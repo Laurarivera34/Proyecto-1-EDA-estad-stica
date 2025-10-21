@@ -1,8 +1,8 @@
 ---
-title: "Taller 2: Explorando datos sobre migrantes venezolanos en Colombia"
+  title: "Proyecto1 : Explorando datos sobre migrantes venezolanos en Colombia"
 subtitle: "Facultad de Economía, Universidad de los Andes"
 author: "Camila Caraballo, Laura Rivera y Javier Amaya Nieto"
-date: "2025-09-15"
+date: "2025-10-31"
 output: html_document
 ---
 
@@ -1843,7 +1843,7 @@ g_stack_final <- ggplot(datos_grafico, aes(x = grupo_vulnerabilidad, y = proporc
 print(g_stack_final)
 
 # --------------------------------
-# EZPORTANDO EL GRÁFICO
+# EXPORTANDO EL GRÁFICO
 ggsave(
   filename = "results/figures/grafico12_servicios_por_condicion_final.png",
   plot = g_stack_final,
@@ -1853,3 +1853,21 @@ ggsave(
   bg = "white"
 )
 ```
+
+# PARTE 4:Evidencia empírica y estimación
+1. Describa el diseño del contraste estadísJco
+1. Seleccione la prueba de acuerdo con la situación (por ejemplo, prueba t de
+diferencia de medias, prueba de proporciones, etc.)
+2. Explique brevemente qué se está comparando y cuál sería la expectaJva teórica o
+empírica según el hecho esJlizado que se desea comprobar.
+3. Señale si el contraste es bilateral o unilateral y cuál sería la dirección esperada del
+efecto. Esto en línea con lo encontrado en el EDA
+2. Revise los supuestos y ejecute la prueba
+1. Verifique las condiciones necesarias para aplicar la prueba elegida (normalidad,
+independencia, homogeneidad de varianzas, tamaño de muestra). En caso de que
+alguna condición no se cumpla, jusJfique la prueba alternaJva empleada o las
+transformaciones realizadas sobre los datos.
+2. Ejecute la prueba y reporte los resultados relevantes: estadísJco de prueba, el
+intervalo de confianza esJmado.
+3. Reporte el p-valor de la prueba de hipótesis y explique qué significa en términos del
+riesgo de error Jpo I.
