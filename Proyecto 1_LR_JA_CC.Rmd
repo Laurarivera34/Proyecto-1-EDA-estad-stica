@@ -50,7 +50,7 @@ pacman::p_load(
 
 Su grupo de trabajo hace parte de un equipo técnico que apoya a una alcaldía en un programa de mejora de la calidad de vida de hogares venezolanos. La alcaldía quiere mejorar la focalización de su respuesta en vivienda y servicios básicos, pero no sabe qué factores son los más importantes para idenficar condiciones de vida deficientes.
 
-### a) Ajustes iniciales
+ a) Ajustes iniciales
 
 -   Designando rutas de trabajo y carga de datos: en este paso se puede revisar rapidamente la base de hogares y se carga la base de personas debido a que se usarán algunas variable de esta última para construir unas variables de la base de hogares que será el foco de nuestro trabajo.
 
@@ -59,10 +59,6 @@ Su grupo de trabajo hace parte de un equipo técnico que apoya a una alcaldía e
 xlsx_path <- "data/2025 JNA VP.xlsx"
 hogares <- read_excel(xlsx_path, sheet = "Hogares") %>% clean_names()
 personas <- read_excel(xlsx_path, sheet = "Personas") %>% clean_names()
-
-#str(hogares) # Ver base
-#colSums(is.na(hogares)) # Revisar NA de la base
-#sum(duplicated(hogares$id_hogar))   # verificar hogares duplicados
 ```
 
 -   Estandarizar nombres (mayúsculas/acentos) en intro4 e intro5: en este paso ajustamos los nombres de departamento y municipio para mejorar la presentación de los datos de aquí en adelante. Y también se hace un proceso de estandarización usando clean:names() de janitor.
@@ -91,7 +87,7 @@ data_hogares <- hogares %>%
 
 ```
 
-### b) Selección de la ciudad
+b) Selección de la ciudad
 
 Considerando los requisitos del taller y la pregunta de indagación consignada en la sección *Parte 1.a*, que propone comparar las carencias en el acceso a servicios públicos entre hogares migrantes según su nivel de vulnerabilidad, esta sección explica la lógica utilizada para seleccionar una ciudad específica.
 
@@ -121,7 +117,7 @@ data_hogares <- data_hogares %>%
   )
 ```
 
-### Intención de migración
+Intención de migración
 
 Esta sección presenta, como eje central, los municipios con menor intención de movilidad, complementados con aquellos de mayor intención y las principales razones de desplazamiento, buscando asegurar la coherencia de los hallazgos.
 
@@ -175,7 +171,7 @@ grafico1 <- ggplot(top10_muni_menor, aes(x = mpio, y = tasa_intencion)) +
 print(grafico1)
 
 # Guardando el gráfico
-ggsave("results/figures/grafico1_mpios_menor_tasa_movimiento.png", 
+ggsave("results/grafico1.png", 
        plot = grafico1, width = 12, height = 6, dpi = 300)
 ```
 
@@ -230,7 +226,7 @@ grafico2 <- ggplot(top10_muni_mayor, aes(x = mpio, y = tasa_intencion)) +
 print(grafico2)
 
 # Guardando el gráfico
-ggsave("results/figures/grafico2_mpios_mayor_intencion_mobilidad.png", 
+ggsave("results/grafico2.png", 
        plot = grafico2, width = 12, height = 6, dpi = 300)
 
 ```
@@ -322,8 +318,8 @@ grafico3 <- ggplot(frecuencias, aes(x = reorder(razon_label, porcentaje), y = po
 
 print(grafico3)
 
-# Guardar en carpeta results/figures
-ggsave("results/figures/grafico3_razones_migracion.png",
+# Guardar en carpeta results
+ggsave("results/grafico3.png",
        plot = grafico3, width = 12, height = 6, dpi = 300)
 
 
@@ -345,11 +341,11 @@ cartagena_pre <- data_hogares %>%
 Considerando la pregunta de investigación planteada, en esta sección se presentan los **análisis univariados** que permiten explorar con mayor detalle las variables centrales del estudio:
 
 -   **Variable dependiente (Y):** *Carencia de acceso a servicios públicos*, que sintetiza las condiciones de vivienda en términos de energía electríca, gas, agua, acueducto y alcantarillado, y disposición de residuos.\
--   **Variable independiente (X):** *Score de vulnerabilidad*, construido a partir de cuatro condiciones clave de vulnerabilidad que se describirán por separado para facilitar su comprensión.
+-   **Variable independiente (X):** *Score de vulnerabilidad*, construido a partir de cuatro condiciones clave de vulnerabilidad que se describirán por separado para facilitar su comprensión (jefatura femenida, hogar monoparental, antecedentes de violencia)
 
 El objetivo de este apartado es caracterizar de manera individual estas variables, identificando su distribución y principales patrones, como paso previo al análisis bivariado que permitirá evaluar la relación entre ellas.
 
-### b) Variable dependiente
+### b) Creación de variable dependiente
 
 Se construye la variable *servicios* que mide la cantidad de servicios básicos de los que carece la vivienda y se construye a partir de las variables (electricidad, gas, alcantallirado, acueducto y recolección de basuras). Por cada servicio que hace falta en el hogar se cuenta como 1 y si carece de todos entonces cuenta como 5
 
@@ -363,7 +359,7 @@ cartagena_pre <- cartagena_pre %>%
            alojamiento4_alojamiento4_recoleccion)
 ```
 
-### c) Variables independientes
+### c) Creación de variables independientes
 
 Para intentar análizar de forma diferencial las diferencias en las carencias de acceso a servicios públicos (variable dependiente), se construyó un **índice de vulnerabilidad** a nivel de hogar que sintetiza cuatro condiciones estructurales asociadas a un mayor riesgo social. Estas condiciones, consideradas de manera individual y en conjunto, permiten caracterizar la situación de vulnerabilidad de los hogares migrantes en Cartagena de Indias. Las variables consideradas son:
 
@@ -376,22 +372,19 @@ A partir de estas cuatro dimensiones se calculó la variable de interés princip
 
 En los siguientes apartados se describe, paso a paso, el procedimiento para identificar cada una de las cuatro condiciones de vulnerabilidad, con sus respectivos resúmenes para Cartagena, el resto del país y el total nacional, antes de integrar la información en el índice final.
 
-####1) Jefatura femenina del hogar:
+1) Jefatura femenina del hogar
 
 ```{r}
-
-# Variable sexo del jefe del hogar
-# - si demo3 indica que la persona encuestada es jefe/a, usamos demo2
-# - si no, usamos demo4 (sexo reportado del/la jefe/a)
+# 1. Preparar variable de sexo del jefe
 hogares_out <- data_hogares %>%
   mutate(
     head_sex = if_else(demo3 == "Sí", demo2, demo4),
     head_female = if_else(head_sex == "Mujer", 1L, 0L)
   )
 
-# Resumen
+# 2. Resumen por región
 resumen_jefatura <- bind_rows(
-  # Cartagena y Resto país
+  # Cartagena vs Resto país
   hogares_out %>%
     mutate(region = if_else(mpio == "Cartagena De Indias", "Cartagena", "Resto país")) %>%
     group_by(region) %>%
@@ -412,18 +405,35 @@ resumen_jefatura <- bind_rows(
 ) %>%
   arrange(factor(region, levels = c("Cartagena", "Resto país", "Total país")))
 
-print(resumen_jefatura)
+
+# 3. Crear tabla HTML con formato “aer”
+tabla1 <- resumen_jefatura %>%
+  kable(
+    format = "html",
+    caption = "Jefatura femenina por región",
+    digits = 2,
+    col.names = c("Región", "Hogares", "Con jefatura femenina", "% Jefatura femenina")
+  ) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE,
+    position = "center"
+  ) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#2C3E50")  # Encabezado personalizado
+
+# 4. Guardar tabla como HTML
+save_kable(tabla1, "results/tabla1.html")
+
 
 ```
 
-####2) Hogar monoparental:
+2) Hogar monoparental
 
 ```{r}
-
-# Estados civiles considerados para single parent
+# 1. Estados civiles 
 single_status <- c("Soltero/a", "Separado/a", "Divorciado/a", "Viudo/a")
 
-# Agregado por hogar desde la base de Personas
+# 2. Agregado por hogar desde la base de Personas
 per_hh <- personas %>%
   group_by(id_hogar) %>%
   summarise(
@@ -433,12 +443,12 @@ per_hh <- personas %>%
     .groups = "drop"
   )
 
-# seleccionando los si respondants
+# 3. Información de hogares 
 hog_min <- data_hogares %>%
   select(id_hogar, demo3, mpio) %>%
   mutate(respondent_is_head = demo3 == "Sí")
 
-# haciendo el left joint usando la variable key
+# 4. Identificar hogares monoparentales
 hog_single <- hog_min %>%
   left_join(per_hh, by = "id_hogar") %>%
   mutate(
@@ -447,8 +457,8 @@ hog_single <- hog_min %>%
     single_parent_relaxed = as.integer(via_A | via_B)
   )
 
-# Resumen de cartagena vs el resto vs total
-resumen <- bind_rows(
+# 5. Resumen por región
+resumen_single <- bind_rows(
   hog_single %>%
     mutate(region = if_else(mpio == "Cartagena De Indias", "Cartagena", "Resto país")) %>%
     group_by(region) %>%
@@ -468,13 +478,30 @@ resumen <- bind_rows(
 ) %>%
   arrange(factor(region, levels = c("Cartagena", "Resto país", "Total país")))
 
-print(resumen)
+# 6. Crear tabla HTML con formato “aer”
+tabla2 <- resumen_single %>%
+  kable(
+    format = "html",
+    caption = "Hogares monoparentales por región",
+    digits = 2,
+    col.names = c("Región", "Hogares", "Hogares monoparentales", "%")
+  ) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE,
+    position = "center"
+  ) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#2C3E50")  
+
+# 7. Guardar tabla
+save_kable(tabla2, "results/tabla2.html")
+
 ```
 
-####3) Presencia de personas con discapacidad
+3) Personas con discapacidad
 
 ```{r}
-# Identificando hogares con alguna persona con discapacidad
+# 1) Identificando personas con discapacidad
 personas_disc <- personas %>%
   mutate(
     has_disability_person = as.integer(
@@ -485,7 +512,7 @@ personas_disc <- personas %>%
   select(id_hogar, id_persona, salud12_barreras_salud_fisica,
          miembros27_barre_discp, has_disability_person)
 
-# 2) Agregado a nivel HOGAR
+# 2) Agregado a nivel hogar
 hog_disc <- personas_disc %>%
   group_by(id_hogar) %>%
   summarise(
@@ -493,10 +520,11 @@ hog_disc <- personas_disc %>%
     .groups = "drop"
   )
 
-# 3) Unir con Hogares para región y calcular resúmenes
+# 3) Unir con hogares y agregar región
 hogares_disability <- data_hogares %>%
   left_join(hog_disc, by = "id_hogar")
 
+# 4) Resumen por región
 resumen_disability <- bind_rows(
   hogares_disability %>%
     mutate(region = if_else(mpio == "Cartagena De Indias", "Cartagena", "Resto país")) %>%
@@ -514,15 +542,32 @@ resumen_disability <- bind_rows(
       n_hh_con_discapacidad = sum(household_has_disability == 1, na.rm = TRUE),
       pct_hh_con_discapacidad = round(mean(replace(household_has_disability, is.na(household_has_disability), 0) == 1) * 100, 2)
     )
-)
+) %>%
+  arrange(factor(region, levels = c("Cartagena", "Resto país", "Total país")))
 
-print(resumen_disability)
+# 5) Crear tabla HTML con formato “aer”
+tabla3 <- resumen_disability %>%
+  kable(
+    format = "html",
+    caption = "Hogares con alguna persona con discapacidad por región",
+    digits = 2,
+    col.names = c("Región", "Hogares", "Hogares con discapacidad", "%")
+  ) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE,
+    position = "center"
+  ) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#2C3E50") 
+
+# 6) Guardar tabla como HTML
+save_kable(tabla3, "results/tabla3.html")
+
 ```
 
-####4) Antecedentes de violencia o amenazas:
-
+4) Antecedentes de violencia o amenazas
 ```{r}
-# Identificando hogares en los cuales hubo violencia para alguno de sus miembros
+# 1) Identificando hogares con violencia para alguno de sus miembros
 hogares_violencia_amenazas <- data_hogares %>%
   mutate(
     household_survivor_violence = if_else(
@@ -530,7 +575,7 @@ hogares_violencia_amenazas <- data_hogares %>%
     )
   )
 
-# Resumen Cartagena vs Resto país
+# 2) Resumen por región
 resumen_violencia_amenazas <- bind_rows(
   hogares_violencia_amenazas %>%
     mutate(region = if_else(mpio == "Cartagena De Indias", "Cartagena", "Resto país")) %>%
@@ -548,50 +593,57 @@ resumen_violencia_amenazas <- bind_rows(
       n_hh_con_violencia = sum(household_survivor_violence == 1, na.rm = TRUE),
       pct_hh_con_violencia = round(mean(household_survivor_violence == 1, na.rm = TRUE) * 100, 2)
     )
-)
+) %>%
+  arrange(factor(region, levels = c("Cartagena", "Resto país", "Total país")))
 
-print(resumen_violencia_amenazas)
+# 3) Crear tabla HTML con formato “aer”
+tabla4 <- resumen_violencia_amenazas %>%
+  kable(
+    format = "html",
+    caption = "Hogares con algún miembro víctima de violencia o amenazas por región",
+    digits = 2,
+    col.names = c("Región", "Hogares", "Hogares con violencia", "% Hogares con violencia")
+  ) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE,
+    position = "center"
+  ) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#2C3E50")  
+
+# 4) Guardar tabla como HTML
+save_kable(tabla4, "results/tabla4.html")
 ```
 
-####5) Índice de vulnerabilidad
+
+5) Índice de vulnerabilidad
 
 Finalmente, el índice de vulnerabilidad es un puntaje aditivo (0–4) que suma cuatro puntos: (1) jefatura del hogar femenina; (2) hogar mono-parental, definido como jefe/a sin cónyuge y con hijos, o presencia de “Papá/Mamá” con estado civil soltero/separado/divorciado/viudo; (3) al menos una persona con discapacidad en el hogar; y (4) antecedente de violencia contra miembros del hogar (proteccion1006_v_ctima_de_violencia_amenazas). El código incluye una comparación de Cartagéna y el país.
 
 ```{r}
-
-# Uniendo componentes en una sola base y construyendo el score
+# 1) Construcción del score de vulnerabilidad
 hogares_vulnerabilidad <- hogares_out %>%
   select(id_hogar, mpio, head_female, f_exp_hog) %>%
-  # Añadimos single parent (regla relajada)
   left_join(hog_single %>% select(id_hogar, single_parent_relaxed), by = "id_hogar") %>%
-  # Añadimos discapacidad a nivel hogar
   left_join(hogares_disability %>% select(id_hogar, household_has_disability), by = "id_hogar") %>%
-  # Añadimos violencia (amenazas) a nivel hogar
   left_join(hogares_violencia_amenazas %>% select(id_hogar, household_survivor_violence), by = "id_hogar") %>%
-  # Aseguramos codificación 0/1 y reemplazamos NA por 0 para la suma
   mutate(
-    head_female                 = coalesce(as.integer(head_female), 0L),
-    single_parent_relaxed       = coalesce(as.integer(single_parent_relaxed), 0L),
-    household_has_disability    = coalesce(as.integer(household_has_disability), 0L),
+    head_female                  = coalesce(as.integer(head_female), 0L),
+    single_parent_relaxed        = coalesce(as.integer(single_parent_relaxed), 0L),
+    household_has_disability     = coalesce(as.integer(household_has_disability), 0L),
     household_survivor_violence = coalesce(as.integer(household_survivor_violence), 0L),
-    # Score aditivo 0–4
     vulnerability_score = head_female +
                           single_parent_relaxed +
                           household_has_disability +
                           household_survivor_violence
   )
 
-
-# Distribución del score 0–4 por región (Cartagena / Resto / Total)
-
-# 2a) Tabla "larga": conteos y porcentajes por score y región
+# 2a) Tabla “larga”: conteos y porcentajes por score y región
 resumen_score <- bind_rows(
-  # Cartagena vs Resto país
   hogares_vulnerabilidad %>%
     mutate(region = if_else(mpio == "Cartagena De Indias", "Cartagena", "Resto país")) %>%
     count(region, vulnerability_score, name = "n") %>%
     group_by(region) %>% mutate(pct = round(100 * n / sum(n), 2)) %>% ungroup(),
-  # Total país
   hogares_vulnerabilidad %>%
     count(vulnerability_score, name = "n") %>%
     mutate(region = "Total país") %>%
@@ -600,19 +652,51 @@ resumen_score <- bind_rows(
   arrange(factor(region, levels = c("Cartagena", "Resto país", "Total país")),
           vulnerability_score)
 
-resumen_score
+# Tabla larga HTML
+tabla5 <- resumen_score %>%
+  kable(
+    format = "html",
+    caption = "Distribución del índice de vulnerabilidad por score y región (tabla larga)",
+    digits = 2,
+    col.names = c("Región", "Score de vulnerabilidad", "N", "%")
+  ) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE,
+    position = "center"
+  ) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#2C3E50")
 
-# 2b) Tabla "ancha": porcentajes por columnas 0,1,2,3,4
+# Guardar tabla larga
+save_kable(tabla5, "results/tabla5.html")
+
+# 2b) Tabla “ancha”: porcentajes por columnas 0–4
 tabla_score_pct <- resumen_score %>%
   select(region, vulnerability_score, pct) %>%
   pivot_wider(names_from = vulnerability_score, values_from = pct, values_fill = 0) %>%
   arrange(factor(region, levels = c("Cartagena", "Resto país", "Total país")))
 
-tabla_score_pct
+# Tabla ancha HTML
+tabla6 <- tabla_score_pct %>%
+  kable(
+    format = "html",
+    caption = "Distribución del índice de vulnerabilidad por región (tabla ancha, %)",
+    digits = 2
+  ) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE,
+    position = "center"
+  ) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#2C3E50")
+
+# Guardar tabla ancha
+save_kable(tabla6, "results/tabla6.html")
 
 ```
 
-### d) Selección de variables
+
+### d) Integración de variables en una base
 
 Ahora vamos a integrar las variables necesarias para los análisis de las siguientes secciones:
 
@@ -654,7 +738,7 @@ cartagena <- left_join(cartagena_dep, cartagena_ind, by = "id_hogar")
 
 Antes de cruzar variables, se debe entender cada variable por sí sola: su codificación, distribución, faltantes y posibles errores. Esto asegura que las comparaciones bivariadas no estén sesgadas pordatos mal definidos. ¿Qué abordar para cada variable? Tipo y codificación: ¿numérica, categórica (nominal/ordinal),fecha, texto? ¿Binarias están en 0/1?
 
-### a) Estructura de la variable dependiente: Servicios
+### a) Variable dependiente: Servicios
 
 -   La variable servicios es númerica con 163 observaciones
 -   Hay hogares en la base que cuentan con todos los servicios
@@ -686,7 +770,7 @@ write_xlsx(
     Valores_NA  = num_na,
     Frecuencias = frecuencias
   ),
-  "results/tablas/tabla1.xlsx"
+  "results/tabla1.xlsx"
 )
 
 
@@ -727,7 +811,7 @@ tabla_comp_serv <- bind_rows(tabla_simple_serv, tabla_pond_serv)
 # Guardar tabla en Excel
 write_xlsx(
   tabla_comp_serv,
-  "results/tablas/tabla2.xlsx"
+  "results/tabla2.xlsx"
 )
 
 
@@ -761,14 +845,14 @@ grafico4 <- ggplot(tabla_comp_serv, aes(x = label, y = porc, fill = tipo)) +
 
 print(grafico4)
 
-ggsave("results/figures/grafico4_carencias_servicios_cartagena.png",
+ggsave("results/grafico4.png",
        plot = grafico4, width = 10, height = 6, dpi = 300)
 
 
 
 ```
 
-### b) Estructura de las variables independientes:
+### b) Variables independientes
 
 ####1) Jefatura femenina del hogar
 
@@ -806,7 +890,7 @@ write_xlsx(
     Valores_NA   = num_na,
     Valores_unicos = valores_unicos
   ),
-  "results/tablas/tabla3.xlsx"
+  "results/tabla3.xlsx"
 )
 
 # Tabla sin ponderar
@@ -845,7 +929,7 @@ tabla_comp <- bind_rows(tabla_simple_df, tabla_pond)
 # Guardar tabla en Excel
 write_xlsx(
   tabla_comp,
-  "results/tablas/tabla4.xlsx"
+  "results/tabla4.xlsx"
 )
 
 # Gráfico
@@ -877,7 +961,7 @@ grafico6 <- ggplot(tabla_comp, aes(x = head_female_label, y = porc, fill = tipo)
 
 print(grafico6)
 
-ggsave("results/figures/grafico5_distribucion_jefatura_hogar.png",
+ggsave("results/grafico5.png",
        plot = grafico6, width = 10, height = 6, dpi = 300)
 
 ```
@@ -918,7 +1002,7 @@ write_xlsx(
     Valores_NA     = num_na_sp,
     Valores_unicos = valores_unicos_sp
   ),
-  "results/tablas/tabla5.xlsx"
+  "results/tabla5.xlsx"
 )
 
 
@@ -959,7 +1043,7 @@ tabla_comp_sp <- bind_rows(tabla_simple_df_sp, tabla_pond_sp)
 # Guardar tabla en Excel
 write_xlsx(
   tabla_comp_sp,
-  "results/tablas/tabla6.xlsx"
+  "results/tabla6.xlsx"
 )
 
 # Gráfico comparativo (sin ponderar vs ponderado)
@@ -991,12 +1075,12 @@ grafico8 <- ggplot(tabla_comp_sp, aes(x = label, y = porc, fill = tipo)) +
 
 print(grafico8)
 
-ggsave("results/figures/grafico7_resutlados_hogar_monoparental.png",
+ggsave("results/grafico7.png",
        plot = grafico8, width = 10, height = 6, dpi = 300)
 
 ```
 
-####3) Presencia de personas con discapacidad
+####3) Personas con discapacidad
 
 La variable household_has_disability, que indica si al menos una persona en el hogar presenta alguna discapacidad. La variable es de tipo entero (int), con valores 0 (sin discapacidad) y 1 (al menos un miembro con discapacidad) y así sucesivamente. En el análisis sin ponderar, se observaron 3.097 hogares sin discapacidad y 28 con al menos un miembro con discapacidad, lo que representa el 99,1 % y 0,9 % respectivamente. No se encontraron valores faltantes en la variable.
 
@@ -1032,7 +1116,7 @@ write_xlsx(
     Valores_NA     = num_na_dis,
     Valores_unicos = valores_unicos_dis
   ),
-  "results/tablas/tabla7.xlsx"
+  "results/tabla7.xlsx"
 )
 
 
@@ -1070,7 +1154,7 @@ tabla_comp_dis <- bind_rows(tabla_simple_df_dis, tabla_pond_dis)
 # Guardar tabla en Excel
 write_xlsx(
   tabla_comp_dis,
-  "results/tablas/tabla8.xlsx"
+  "results/tabla8.xlsx"
 )
 
 # Gráfico comparativo 
@@ -1097,7 +1181,7 @@ grafico9 <- ggplot(tabla_comp_dis, aes(x = label, y = porc, fill = tipo)) +
   )
 
 print(grafico9)
-ggsave("results/figures/grafico8_resultados_discapcidad.png", plot = grafico9, width = 10, height = 6, dpi = 300)
+ggsave("results/grafico8.png", plot = grafico9, width = 10, height = 6, dpi = 300)
 
 ```
 
