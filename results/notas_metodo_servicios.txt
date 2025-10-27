@@ -1,0 +1,8 @@
+
+Notas de método:
+- Se estandarizaron las etiquetas y las categorías con valores entre 0 y 5.
+- No se encontraron valores fuera del rango 0–5.
+- Las barras de error no se aplican porque la variable es discreta.
+- Los valores NA se reportan explícitamente y no fueron imputados.
+- Las categorías con frecuencia menor al 3% se mantuvieron dado su significado sustantivo.
+

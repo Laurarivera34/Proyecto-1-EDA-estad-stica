@@ -26,6 +26,7 @@ pacman::p_load(
   scales,       # Formato de escalas en ggplot2 (ej. porcentajes, comas).
   openxlsx,     # Guardar excel
   writexl,      # Guardar excel
+  kableExtra,
 
   # B) Modelado y análisis estadístico/econométrico
   fixest,       # Estimación de modelos de efectos fijos de alto rendimiento.
@@ -412,7 +413,7 @@ tabla1 <- resumen_jefatura %>%
     format = "html",
     caption = "Jefatura femenina por región",
     digits = 2,
-    col.names = c("Región", "Hogares", "Con jefatura femenina", "% Jefatura femenina")
+    col.names = c("Región", "Hogares", "Con jefatura femenina", "%")
   ) %>%
   kable_styling(
     bootstrap_options = c("striped", "hover", "condensed", "responsive"),
@@ -748,7 +749,6 @@ Antes de cruzar variables, se debe entender cada variable por sí sola: su codif
 
 ```{r}
 # 1. Tipo de variable (estructura)
-# ------------------------------
 estructura <- data.frame(estructura = capture.output(str(cartagena$servicios)))
 
 estructura_html <- estructura %>%
@@ -756,9 +756,7 @@ estructura_html <- estructura %>%
   kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
 save_kable(estructura_html, "results/estructura_servicios.html")
 
-# ------------------------------
 # 2. Distribución (frecuencias sin ponderar)
-# ------------------------------
 tabla_simple <- as.data.frame(table(cartagena$servicios, useNA = "ifany"))
 colnames(tabla_simple) <- c("Valor", "Frecuencia")
 
@@ -767,9 +765,7 @@ tabla_simple_html <- tabla_simple %>%
   kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
 save_kable(tabla_simple_html, "results/frecuencias_servicios.html")
 
-# ------------------------------
 # 3. Proporciones (sin ponderar)
-# ------------------------------
 prop_simple <- round(prop.table(table(cartagena$servicios, useNA = "ifany")) * 100, 1)
 prop_simple <- data.frame(Valor = names(prop_simple), Proporcion = as.vector(prop_simple))
 
@@ -778,9 +774,7 @@ prop_simple_html <- prop_simple %>%
   kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
 save_kable(prop_simple_html, "results/proporciones_servicios.html")
 
-# ------------------------------
 # 4. Datos faltantes (NA)
-# ------------------------------
 num_na <- data.frame(
   NA_count = sum(is.na(cartagena$servicios)),
   NA_pct   = round(mean(is.na(cartagena$servicios)) * 100, 2)
@@ -791,9 +785,7 @@ num_na_html <- num_na %>%
   kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
 save_kable(num_na_html, "results/na_servicios.html")
 
-# ------------------------------
 # 5. Valores únicos
-# ------------------------------
 valores_unicos <- data.frame(Valores_unicos = sort(unique(cartagena$servicios)))
 
 valores_unicos_html <- valores_unicos %>%
@@ -801,9 +793,7 @@ valores_unicos_html <- valores_unicos %>%
   kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
 save_kable(valores_unicos_html, "results/unicos_servicios.html")
 
-# ------------------------------
 # 6. Tabla resumen con porcentaje y etiquetas
-# ------------------------------
 tabla_resumen <- cartagena %>%
   count(servicios) %>%
   mutate(
@@ -826,9 +816,7 @@ tabla_resumen_html <- tabla_resumen %>%
   kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
 save_kable(tabla_resumen_html, "results/tabla_resumen_servicios.html")
 
-# ------------------------------
-# 7. Gráfico (solo PNG, no HTML)
-# ------------------------------
+# 7. Gráfico
 grafico4 <- ggplot(tabla_resumen, aes(x = servicios_label, y = porc)) +
   geom_col(fill = "#003366", alpha = 0.9) +
   geom_text(aes(label = paste0(porc, "%")), vjust = -0.4, size = 3.5, color = "black") +
@@ -854,9 +842,7 @@ print(grafico4)
 ggsave("results/grafico4.png",
        plot = grafico4, width = 10, height = 6, dpi = 300)
 
-# ------------------------------
 # 8. Notas de método
-# ------------------------------
 notas_metodo <- "
 Notas de método:
 - Se estandarizaron las etiquetas y las categorías con valores entre 0 y 5.
@@ -874,9 +860,7 @@ Se aplicó el factor de expansión de hogares (F_EXP_hog) para calcular la distr
 
 
 ```{r}
-# ============================
 # 1. Tipo de variable (estructura)
-# ============================
 estructura <- data.frame(estructura = capture.output(str(cartagena$servicios)))
 
 tabla7 <- estructura %>%
@@ -884,9 +868,7 @@ tabla7 <- estructura %>%
   kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
 save_kable(tabla7, "results/tabla7.html")
 
-# ============================
 # 2. Tablas sin y con ponderación
-# ============================
 # Sin ponderar
 tabla_simple_serv <- cartagena %>%
   count(servicios) %>%
@@ -918,9 +900,7 @@ tabla8 <- tabla_simple_serv %>%
   ) %>%
   select(servicios_label, n_sinpond, porc_sinpond, n_pond, porc_pond)
 
-# ============================
-# 3. Guardar tabla en HTML
-# ============================
+# 3. Guardar 
 tabla8 <- tabla_comp_serv %>%
   kable(
     "html",
@@ -940,9 +920,7 @@ tabla8 <- tabla_comp_serv %>%
 
 save_kable(tabla8, "results/tabla8.html")
 
-# ============================
-# 4. Gráfico comparativo (PNG)
-# ============================
+# 4. Gráfico comparativo
 tabla_grafico <- tabla_comp_serv %>%
   tidyr::pivot_longer(cols = c(porc_sinpond, porc_pond),
                       names_to = "tipo",
@@ -981,9 +959,7 @@ grafico6 <- ggplot(tabla_grafico, aes(x = servicios_label, y = porc, fill = tipo
 ggsave("results/grafico6.png",
        plot = grafico6, width = 10, height = 6, dpi = 300)
 
-# ============================
 # 5. Notas de método
-# ============================
 notas_metodo <- "
 Notas de método:
 - La variable 'servicios' mide el número de carencias en el acceso a servicios básicos (0 a 5).
