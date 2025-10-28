@@ -773,7 +773,7 @@ tabla_resumen <- resumen_servicios %>%
   row_spec(0, bold = TRUE, color = "white", background = "#003366")  # <-- Encabezado azul oscuro
 
 # 1.3 Guardar tabla 
-save_kable(tabla_resumen, "results/resumen_servicios.html")
+save_kable(tabla_resumen, "results/tabla7.html")
 
 
 # 2. Tabla de distribución
@@ -815,7 +815,7 @@ grafico_servicios <- ggplot(tabla_resumen, aes(x = servicios_label, y = porc)) +
 # 2.2 Mostrar y guardar
 print(grafico_servicios)
 
-ggsave("results/grafico_servicios.png",
+ggsave("results/grafico4.png",
        plot = grafico_servicios, width = 10, height = 6, dpi = 300)
 
 # 3. Notas de método
@@ -922,7 +922,7 @@ grafico6 <- ggplot(tabla_grafico, aes(x = factor(servicios), y = porc, fill = ti
   )
 
 # 2.2 Guardar gráfico
-ggsave("results/grafico6.png",
+ggsave("results/grafico5.png",
        plot = grafico6, width = 10, height = 6, dpi = 300)
 
 # 3. Notas de método
@@ -1057,7 +1057,7 @@ grafico_headfem <- ggplot(tabla_resumen_headfem, aes(x = head_female_label, y = 
 # 2.2 Mostrar y guardar
 print(grafico_headfem)
 
-ggsave("results/grafico_headfem.png",
+ggsave("results/grafico6.png",
        plot = grafico_headfem, width = 10, height = 6, dpi = 300)
 
 
@@ -1085,7 +1085,7 @@ tabla7_fem <- estructura %>%
   kable("html", caption = "Estructura de la variable: Jefatura femenina del hogar") %>%
   kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
 
-save_kable(tabla7_fem, "results/tabla7_headfem.html")
+save_kable(tabla7_fem, "results/tabla9.html")
 
 # 1.2 Tablas sin y con ponderación
 # Sin ponderar
@@ -1124,7 +1124,7 @@ tabla8_fem <- tabla_comp_fem %>%
   ) %>%
   row_spec(0, bold = TRUE, color = "white", background = "#003366")
 
-save_kable(tabla8_fem, "results/tabla8_headfem.html")
+save_kable(tabla8_fem, "results/tabla10.html")
 
 # 2. Tabla para gráfico
 tabla_grafico_fem <- tabla_comp_fem %>%
@@ -1166,7 +1166,7 @@ grafico_fem <- ggplot(tabla_grafico_fem, aes(x = head_female, y = porc, fill = t
     plot.margin = unit(c(1, 1, 1, 1), "cm")
   )
 
-ggsave("results/grafico_headfem.png", plot = grafico_fem, width = 10, height = 6, dpi = 300)
+ggsave("results/grafico7.png", plot = grafico_fem, width = 10, height = 6, dpi = 300)
 
 # 3. Notas de método
 notas_metodo_fem <- "
@@ -1254,7 +1254,7 @@ tabla_resumen_singleparent <- resumen_singleparent %>%
   row_spec(0, bold = TRUE, color = "white", background = "#003366")  # Encabezado azul oscuro
 
 # 1.3 Guardar tabla 
-save_kable(tabla_resumen_singleparent, "results/resumen_singleparent.html")
+save_kable(tabla_resumen_singleparent, "results/tabla11.html")
 
 
 # 2. Tabla de distribución
@@ -1293,7 +1293,7 @@ grafico_singleparent <- ggplot(tabla_resumen_singleparent, aes(x = single_parent
 # 2.2 Mostrar y guardar
 print(grafico_singleparent)
 
-ggsave("results/grafico_singleparent.png",
+ggsave("results/grafico8.png",
        plot = grafico_singleparent, width = 10, height = 6, dpi = 300)
 
 
@@ -1322,7 +1322,7 @@ tabla7_single <- estructura %>%
   kable("html", caption = "Estructura de la variable: Hogar monoparental (definición relajada)") %>%
   kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
 
-save_kable(tabla7_single, "results/tabla7_single_parent_relaxed.html")
+save_kable(tabla7_single, "results/tabla12.html")
 
 # 1.2 Tablas sin y con ponderación
 # Sin ponderar
@@ -1361,7 +1361,7 @@ tabla8_single <- tabla_comp_single %>%
   ) %>%
   row_spec(0, bold = TRUE, color = "white", background = "#003366")
 
-save_kable(tabla8_single, "results/tabla8_single_parent_relaxed.html")
+save_kable(tabla8_single, "results/tabla13.html")
 
 # 2. Tabla para gráfico
 tabla_grafico_single <- tabla_comp_single %>%
@@ -1403,7 +1403,7 @@ grafico_single <- ggplot(tabla_grafico_single, aes(x = single_parent_relaxed, y 
     plot.margin = unit(c(1, 1, 1, 1), "cm")
   )
 
-ggsave("results/grafico_single_parent_relaxed.png", plot = grafico_single, width = 10, height = 6, dpi = 300)
+ggsave("results/grafico9.png", plot = grafico_single, width = 10, height = 6, dpi = 300)
 
 # 3. Notas de método
 notas_metodo_single <- "
@@ -1489,7 +1489,7 @@ tabla_resumen_disability <- resumen_disability %>%
   row_spec(0, bold = TRUE, color = "white", background = "#003366")  # Encabezado azul oscuro
 
 # 1.3 Guardar tabla 
-save_kable(tabla_resumen_disability, "results/resumen_disability.html")
+save_kable(tabla_resumen_disability, "results/tabla14.html")
 
 
 # 2. Tabla de distribución
@@ -1528,7 +1528,7 @@ grafico_disability <- ggplot(tabla_resumen_disability, aes(x = disability_label,
 # 2.2 Mostrar y guardar
 print(grafico_disability)
 
-ggsave("results/grafico_disability.png",
+ggsave("results/grafico9.png",
        plot = grafico_disability, width = 10, height = 6, dpi = 300)
 
 
@@ -1555,7 +1555,7 @@ tabla7_disc <- estructura %>%
   kable("html", caption = "Estructura de la variable: Hogar con personas con discapacidad") %>%
   kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
 
-save_kable(tabla7_disc, "results/tabla7_household_has_disability.html")
+save_kable(tabla7_disc, "results/tabla15.html")
 
 # 1.2 Tablas sin y con ponderación
 # Sin ponderar
@@ -1594,7 +1594,7 @@ tabla8_disc <- tabla_comp_disc %>%
   ) %>%
   row_spec(0, bold = TRUE, color = "white", background = "#003366")
 
-save_kable(tabla8_disc, "results/tabla8_household_has_disability.html")
+save_kable(tabla8_disc, "results/tabla16.html")
 
 # 2. Tabla para gráfico
 tabla_grafico_disc <- tabla_comp_disc %>%
@@ -1636,7 +1636,7 @@ grafico_disc <- ggplot(tabla_grafico_disc, aes(x = household_has_disability, y =
     plot.margin = unit(c(1, 1, 1, 1), "cm")
   )
 
-ggsave("results/grafico_household_has_disability.png", plot = grafico_disc, width = 10, height = 6, dpi = 300)
+ggsave("results/grafico10.png", plot = grafico_disc, width = 10, height = 6, dpi = 300)
 
 # 3. Notas de método
 notas_metodo_disc <- "
@@ -1723,7 +1723,7 @@ tabla_resumen_violence <- resumen_violence %>%
   row_spec(0, bold = TRUE, color = "white", background = "#003366")  # Encabezado azul oscuro
 
 # 1.3 Guardar tabla 
-save_kable(tabla_resumen_violence, "results/resumen_violence.html")
+save_kable(tabla_resumen_violence, "results/tabla17.html")
 
 
 # 2. Tabla de distribución
@@ -1762,7 +1762,7 @@ grafico_violence <- ggplot(tabla_resumen_violence, aes(x = violence_label, y = p
 # 2.2 Mostrar y guardar
 print(grafico_violence)
 
-ggsave("results/grafico_violence.png",
+ggsave("results/grafico11.png",
        plot = grafico_violence, width = 10, height = 6, dpi = 300)
 
 
@@ -1790,7 +1790,7 @@ tabla7_viol <- estructura %>%
   kable("html", caption = "Estructura de la variable: Hogar con sobrevivientes de violencia") %>%
   kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
 
-save_kable(tabla7_viol, "results/tabla7_household_survivor_violence.html")
+save_kable(tabla7_viol, "results/tabla18.html")
 
 # 1.2 Tablas sin y con ponderación
 # Sin ponderar
@@ -1829,7 +1829,7 @@ tabla8_viol <- tabla_comp_viol %>%
   ) %>%
   row_spec(0, bold = TRUE, color = "white", background = "#003366")
 
-save_kable(tabla8_viol, "results/tabla8_household_survivor_violence.html")
+save_kable(tabla8_viol, "results/tabla19.html")
 
 # 2. Tabla para gráfico
 tabla_grafico_viol <- tabla_comp_viol %>%
@@ -1871,7 +1871,7 @@ grafico_viol <- ggplot(tabla_grafico_viol, aes(x = household_survivor_violence, 
     plot.margin = unit(c(1, 1, 1, 1), "cm")
   )
 
-ggsave("results/grafico_household_survivor_violence.png", plot = grafico_viol, width = 10, height = 6, dpi = 300)
+ggsave("results/grafico12.png", plot = grafico_viol, width = 10, height = 6, dpi = 300)
 
 # 3. Notas de método
 notas_metodo_viol <- "
@@ -1930,6 +1930,13 @@ print(grafico_viol_ic)
 Explorando en detalle el índice de vulnerabilidad, definida como una variable categórica de 0 a 4, la cual indica la cantidad de vulnerabilidades con las que cuentan los hogares. 
 
 ```{r}
+
+# Se realiza una copia del DF de análisis
+cartagena_vul <- cartagena
+
+# ipo de variable (estructura)
+estructura_vul <- data.frame(estructura = capture.output(str(cartagena_vul$vulnerability_score)))
+
 # 1. Tabla resumen
 resumen_vul <- data.frame(
   Estadístico = c("N", "NAs", "Valores únicos", "Min.", "1st Qu.", "Median", "Mean", "3rd Qu.", "Max."),
@@ -1960,7 +1967,7 @@ tabla_resumen_vul <- resumen_vul %>%
   row_spec(0, bold = TRUE, color = "white", background = "#003366")  # Encabezado azul oscuro
 
 # 1.3 Guardar tabla
-save_kable(tabla_resumen_vul, "results/resumen_vul.html")
+save_kable(tabla_resumen_vul, "results/tabla20.html")
 
 
 # 2. Distribución de la variable
@@ -2020,6 +2027,180 @@ writeLines(notas_metodo_vul, "results/notas_metodo_vul.txt")
 
 Ahora con factor de expansión:
 ```{r}
+
+# --- 1. Estructura de la variable ---
+estructura_vulniv <- data.frame(
+  estructura = capture.output(str(cartagena_vul$vulnerability_score))
+)
+
+tabla7_vulniv <- estructura_vulniv %>%
+  kable("html", caption = "Estructura de la variable: Índice de vulnerabilidad del hogar") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
+
+save_kable(tabla7_vulniv, "results/tabla21.html")
+
+
+# --- 1.2 Tablas sin y con ponderación ---
+# SIN ponderar
+tabla_simple_vulniv <- cartagena_vul %>%
+  mutate(
+    nivel_vul = case_when(
+      vulnerability_score == 0 ~ "0: Sin condiciones",
+      vulnerability_score == 1 ~ "1: Una condición",
+      vulnerability_score == 2 ~ "2: Dos condiciones",
+      vulnerability_score == 3 ~ "3: Tres condiciones",
+      vulnerability_score == 4 ~ "4: Todas las condiciones",
+      TRUE ~ "NA / No sabe"
+    )
+  ) %>%
+  count(nivel_vul) %>%
+  mutate(
+    n_sinpond = as.numeric(n),
+    porc_sinpond = round(100 * n / sum(n), 1)
+  ) %>%
+  select(nivel_vul, n_sinpond, porc_sinpond)
+
+
+# CON ponderación (factor de expansión)
+tabla_pond_vulniv <- cartagena_vul %>%
+  mutate(
+    nivel_vul = case_when(
+      vulnerability_score == 0 ~ "0: Sin condiciones",
+      vulnerability_score == 1 ~ "1: Una condición",
+      vulnerability_score == 2 ~ "2: Dos condiciones",
+      vulnerability_score == 3 ~ "3: Tres condiciones",
+      vulnerability_score == 4 ~ "4: Todas las condiciones",
+      TRUE ~ "NA / No sabe"
+    )
+  ) %>%
+  group_by(nivel_vul) %>%
+  summarise(n_pond = sum(f_exp_hog, na.rm = TRUE), .groups = "drop") %>%
+  mutate(porc_pond = round(100 * n_pond / sum(n_pond), 1))
+
+
+# --- 1.3 Unir tablas lado a lado ---
+tabla_comp_vulniv <- tabla_simple_vulniv %>%
+  full_join(tabla_pond_vulniv, by = "nivel_vul") %>%
+  arrange(nivel_vul)
+
+# --- 1.4 Crear tabla HTML ---
+tabla8_vulniv <- tabla_comp_vulniv %>%
+  kable(
+    "html",
+    caption = "<b style='color:#003366; font-size:16px;'>Índice de vulnerabilidad del hogar (0 a 4)</b>",
+    col.names = c("Nivel de vulnerabilidad", "N (sin pond.)", "% (sin pond.)", "N (pond.)", "% (pond.)"),
+    digits = 1
+  ) %>%
+  add_header_above(c(" " = 1, "Sin ponderar" = 2, "Ponderado" = 2)) %>%
+  kable_styling(
+    full_width = FALSE,
+    bootstrap_options = c("striped", "hover", "condensed"),
+    position = "center"
+  ) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#003366")
+
+save_kable(tabla8_vulniv, "results/tabla22.html")
+
+
+# --- 2. Gráfico comparativo sin y con ponderación ---
+tabla_grafico_vulniv <- tabla_comp_vulniv %>%
+  select(nivel_vul, porc_sinpond, porc_pond) %>%
+  pivot_longer(cols = c(porc_sinpond, porc_pond),
+               names_to = "tipo", values_to = "porc") %>%
+  mutate(
+    tipo = ifelse(tipo == "porc_pond", "Ponderado", "Sin ponderar"),
+    nivel_vul = factor(nivel_vul, levels = c(
+      "0: Sin condiciones", "1: Una condición", "2: Dos condiciones",
+      "3: Tres condiciones", "4: Todas las condiciones"
+    ))
+  )
+
+grafico_vulniv <- ggplot(tabla_grafico_vulniv, aes(x = nivel_vul, y = porc, fill = tipo)) +
+  geom_col(position = "dodge", alpha = 0.9) +
+  geom_text(
+    aes(label = paste0(porc, "%")),
+    position = position_dodge(width = 0.9),
+    vjust = -0.4, size = 3.5
+  ) +
+  scale_fill_manual(values = c("Sin ponderar" = "#999999", "Ponderado" = "#003366")) +
+  labs(
+    title = "Distribución del índice de vulnerabilidad del hogar",
+    subtitle = "Comparación entre resultados sin ponderar y ponderados",
+    x = "Nivel de vulnerabilidad (número de condiciones)",
+    y = "Porcentaje de hogares",
+    fill = "Tipo de cálculo"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+    axis.text.x = element_text(size = 10, angle = 15, hjust = 1),
+    axis.title.x = element_text(size = 11, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 11, margin = margin(r = 10)),
+    plot.title = element_text(face = "bold", size = 16, hjust = 0),
+    plot.subtitle = element_text(size = 12, hjust = 0)
+  )
+
+ggsave("results/grafico13.png", plot = grafico_vulniv, width = 10, height = 6, dpi = 300)
+
+
+# --- 3. Notas de método ---
+notas_metodo_vulniv <- "
+Notas de método:
+- La variable 'vulnerability_score' representa el índice de vulnerabilidad del hogar (0 a 4).
+- Cada valor indica el número de condiciones de vulnerabilidad presentes:
+  (i) jefatura del hogar femenina,
+  (ii) hogar monoparental,
+  (iii) presencia de personas con discapacidad,
+  (iv) antecedentes de violencia.
+- Los niveles se interpretan así:
+  0: sin condiciones; 1: una condición; 2: dos; 3: tres; 4: todas las condiciones.
+- Se presentan resultados sin ponderar y ponderados (usando 'f_exp_hog').
+- Los porcentajes ponderados reflejan la distribución ajustada a la población.
+"
+
+writeLines(notas_metodo_vulniv, "results/notas_metodo_vulnerability_index.txt")
+
+
+# --- 4. Intervalos de confianza (IC 95%) para el ponderado ---
+tabla_ic_vulniv <- tabla_comp_vulniv %>%
+  mutate(
+    p = porc_pond / 100,
+    n = n_pond,
+    se = sqrt(p * (1 - p) / n),
+    ic_inf = 100 * (p - 1.96 * se),
+    ic_sup = 100 * (p + 1.96 * se)
+  )
+
+grafico_ic_vulniv <- ggplot(tabla_ic_vulniv, aes(
+  x = factor(nivel_vul, levels = c(
+    "0: Sin condiciones", "1: Una condición", "2: Dos condiciones",
+    "3: Tres condiciones", "4: Todas las condiciones"
+  )),
+  y = porc_pond
+)) +
+  geom_col(fill = "#003366", alpha = 0.9) +
+  geom_errorbar(aes(ymin = ic_inf, ymax = ic_sup), width = 0.2, color = "black") +
+  geom_text(aes(label = paste0(round(porc_pond, 1), "%")),
+            vjust = -0.4, size = 3.5, color = "black") +
+  labs(
+    title = "Distribución ponderada del índice de vulnerabilidad del hogar",
+    subtitle = "Porcentaje ponderado con intervalos de confianza al 95%",
+    x = "Nivel de vulnerabilidad (número de condiciones)",
+    y = "Porcentaje de hogares"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+    axis.text.x = element_text(size = 10, angle = 15, hjust = 1),
+    axis.title.x = element_text(size = 11, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 11, margin = margin(r = 10)),
+    plot.title = element_text(face = "bold", size = 16, hjust = 0),
+    plot.subtitle = element_text(size = 12, hjust = 0)
+  )
+
+print(grafico_ic_vulniv)
+ggsave("results/grafico14.png", plot = grafico_ic_vulniv, width = 10, height = 6, dpi = 300)
+
 
 ```
 
@@ -2415,7 +2596,7 @@ print(g_stack_final_simple)
 
 # exportando el gráfico
 ggsave(
-  filename = "results/figures/grafico11_servicios_VulScore_stacked.png",
+  filename = "results/grafico15.png",
   plot = g_stack_final_simple,
   width = 10,
   height = 7,
@@ -2472,10 +2653,10 @@ df_largo <- cartagena %>%
       "Víctima de Violencia" = "household_survivor_violence"
     ),
     # Reordenamos los niveles para que "Sin Vulnerabilidad" aparezca primero.
-    grupo_vulnerabilidad = fct_relevel(
-      grupo_vulnerabilidad, 
-      "Sin Vulnerabilidad", "Jefatura Femenina", "Monoparental", "Con Discapacidad"
-    )
+  grupo_vulnerabilidad = fct_relevel(
+  grupo_vulnerabilidad, 
+  "Sin Vulnerabilidad", "Jefatura Femenina", "Monoparental", "Con Discapacidad", "Víctima de Violencia"
+)
   )
 
 # --------------------------------
@@ -2549,7 +2730,7 @@ print(g_stack_final)
 # --------------------------------
 # EXPORTANDO EL GRÁFICO
 ggsave(
-  filename = "results/figures/grafico12_servicios_por_condicion_final.png",
+  filename = "results/grafico16.png",
   plot = g_stack_final,
   width = 11,
   height = 8,
