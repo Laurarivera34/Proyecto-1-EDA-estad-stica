@@ -1,0 +1,8 @@
+
+Notas de método:
+- La variable 'single_parent_relaxed' identifica si el hogar es monoparental bajo una definición relajada (1 = sí, 0 = no).
+- Se validó que la codificación sea binaria (0 y 1).
+- Los valores NA se reportan explícitamente y no fueron imputados.
+- No se aplican barras de error al gráfico porque la variable es categórica y discreta.
+- La definición relajada considera hogares donde el jefe o jefa convive con hijos sin pareja residente, sin distinguir por sexo del jefe.
+

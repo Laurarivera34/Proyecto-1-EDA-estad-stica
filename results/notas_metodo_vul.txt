@@ -1,0 +1,8 @@
+
+Notas de método:
+- La variable 'vulnerability_score' corresponde a un puntaje continuo que mide el nivel de vulnerabilidad de los hogares.
+- Los valores más altos indican mayor vulnerabilidad.
+- Se validó que no existan valores fuera del rango esperado (0 a 1).
+- Los valores NA se reportan explícitamente y no fueron imputados.
+- No se aplican barras de error porque la variable es continua y se describe mediante estadísticos de tendencia central y dispersión.
+

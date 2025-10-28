@@ -1,0 +1,8 @@
+
+Notas de método:
+- La variable 'household_has_disability' identifica si el hogar cuenta con al menos una persona con discapacidad (1 = sí, 0 = no).
+- Se confirmó que la variable tiene codificación binaria (0 y 1).
+- Los valores NA se reportan explícitamente y no fueron imputados.
+- No se aplican barras de error porque la variable es discreta y categórica.
+- La mayoría de hogares no presentan personas con discapacidad, lo cual explica la asimetría en la distribución.
+

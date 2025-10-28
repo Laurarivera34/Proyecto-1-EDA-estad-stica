@@ -1,0 +1,7 @@
+
+Notas de método:
+- La variable 'household_survivor_violence' identifica si en el hogar reside al menos una persona sobreviviente de violencia (1 = sí, 0 = no).
+- La tabla presenta los conteos (N) y proporciones (%) sin ponderar y ponderados por el factor de expansión (f_exp_hog).
+- Los valores ponderados reflejan la distribución ajustada a la población.
+- La prevalencia de hogares con sobrevivientes de violencia es baja, pero representa un grupo prioritario de atención.
+

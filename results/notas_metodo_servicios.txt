@@ -1,8 +1,9 @@
 
 Notas de método:
-- Se estandarizaron las etiquetas y las categorías con valores entre 0 y 5.
-- No se encontraron valores fuera del rango 0–5.
-- Las barras de error no se aplican porque la variable es discreta.
-- Los valores NA se reportan explícitamente y no fueron imputados.
-- Las categorías con frecuencia menor al 3% se mantuvieron dado su significado sustantivo.
+- La variable 'servicios' mide el número de carencias en el acceso a servicios básicos (0 a 5).
+- La tabla presenta los conteos (N) y proporciones (%) comparando resultados sin ponderar y ponderados por el factor de expansión del hogar (f_exp_hog).
+- Los valores ponderados reflejan la distribución poblacional representativa.
+- No se identificaron valores fuera del rango 0–5.
+- Los valores NA se reportan explícitamente y no se imputaron.
+- Las categorías con frecuencia menor al 3% se mantuvieron dada su relevancia sustantiva.
 

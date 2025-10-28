@@ -1,0 +1,8 @@
+
+Notas de método:
+- La variable 'head_female' identifica si el hogar tiene jefatura femenina (1 = mujer, 0 = hombre).
+- Se estandarizaron las etiquetas de acuerdo con la codificación binaria.
+- No se identificaron valores fuera del rango esperado (0–1).
+- Las barras de error no se aplican porque la variable es discreta y categórica.
+- Los valores NA se reportan explícitamente y no fueron imputados.
+

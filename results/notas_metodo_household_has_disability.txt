@@ -1,0 +1,7 @@
+
+Notas de método:
+- La variable 'household_has_disability' identifica si en el hogar hay al menos una persona con discapacidad (1 = sí, 0 = no).
+- La tabla compara los conteos (N) y proporciones (%) sin ponderar y ponderados por el factor de expansión (f_exp_hog).
+- Los valores ponderados reflejan la distribución ajustada a la población.
+- La mayoría de hogares no reportan personas con discapacidad, por lo que la incidencia de esta condición es baja.
+

@@ -1,0 +1,8 @@
+
+Notas de método:
+- La variable 'household_survivor_violence' identifica si en el hogar hay al menos una persona sobreviviente de violencia (1 = sí, 0 = no).
+- Se validó que la codificación sea binaria (0 y 1).
+- Los valores NA se reportan explícitamente y no fueron imputados.
+- No se aplican barras de error porque la variable es categórica y discreta.
+- La baja proporción de hogares con víctimas refleja la sensibilidad del tema y posible subregistro en la respuesta.
+

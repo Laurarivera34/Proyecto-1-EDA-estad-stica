@@ -1,0 +1,7 @@
+
+Notas de método:
+- La variable 'single_parent_relaxed' identifica si el hogar es monoparental bajo una definición relajada (1 = sí, 0 = no).
+- La tabla compara los conteos (N) y proporciones (%) sin ponderar y ponderados por el factor de expansión (f_exp_hog).
+- Los valores ponderados reflejan la distribución ajustada a la población.
+- No se identificaron valores perdidos o inconsistentes en la variable.
+

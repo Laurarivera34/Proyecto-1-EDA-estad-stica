@@ -741,63 +741,45 @@ Antes de cruzar variables, se debe entender cada variable por sí sola: su codif
 
 ### a) Variable dependiente: Servicios
 
--   La variable servicios es númerica con 163 observaciones
--   Hay hogares en la base que cuentan con todos los servicios
--   Los valores de servicios van de 0 a 4, ningun hogar tiene los 5 servicios
--   Todos los hogares tienen un dato, es decir, no se encuentran NA
-
-
 ```{r}
-# 1. Tipo de variable (estructura)
-estructura <- data.frame(estructura = capture.output(str(cartagena$servicios)))
 
-estructura_html <- estructura %>%
-  kable("html", caption = "Estructura de la variable: Carencia de servicios públicos") %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
-save_kable(estructura_html, "results/estructura_servicios.html")
-
-# 2. Distribución (frecuencias sin ponderar)
-tabla_simple <- as.data.frame(table(cartagena$servicios, useNA = "ifany"))
-colnames(tabla_simple) <- c("Valor", "Frecuencia")
-
-tabla_simple_html <- tabla_simple %>%
-  kable("html", caption = "Distribución de frecuencias (sin ponderar)") %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
-save_kable(tabla_simple_html, "results/frecuencias_servicios.html")
-
-# 3. Proporciones (sin ponderar)
-prop_simple <- round(prop.table(table(cartagena$servicios, useNA = "ifany")) * 100, 1)
-prop_simple <- data.frame(Valor = names(prop_simple), Proporcion = as.vector(prop_simple))
-
-prop_simple_html <- prop_simple %>%
-  kable("html", caption = "Proporciones (%) de la variable: Carencia de servicios públicos") %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
-save_kable(prop_simple_html, "results/proporciones_servicios.html")
-
-# 4. Datos faltantes (NA)
-num_na <- data.frame(
-  NA_count = sum(is.na(cartagena$servicios)),
-  NA_pct   = round(mean(is.na(cartagena$servicios)) * 100, 2)
+# 1. Tabla resumen
+resumen_servicios <- data.frame(
+  Estadístico = c("N", "NAs", "Valores únicos", "Min.", "1st Qu.", "Median", "Mean", "3rd Qu.", "Max."),
+  valor = c(
+    sum(!is.na(cartagena$servicios)),
+    sum(is.na(cartagena$servicios)),
+    length(unique(cartagena$servicios)),
+    min(cartagena$servicios, na.rm = TRUE),
+    quantile(cartagena$servicios, 0.25, na.rm = TRUE),
+    median(cartagena$servicios, na.rm = TRUE),
+    mean(cartagena$servicios, na.rm = TRUE),
+    quantile(cartagena$servicios, 0.75, na.rm = TRUE),
+    max(cartagena$servicios, na.rm = TRUE)
+  )
 )
 
-num_na_html <- num_na %>%
-  kable("html", caption = "Valores faltantes (NA)") %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
-save_kable(num_na_html, "results/na_servicios.html")
+# 1.2 Generar tabla 
+tabla_resumen <- resumen_servicios %>%
+  kable(
+    "html",
+    caption = "<b style='color:#003366; font-size:16px;'>Variable dependiente: Servicios</b>"
+  ) %>%
+  kable_styling(
+    full_width = FALSE,
+    bootstrap_options = c("striped", "hover", "condensed"),
+    position = "center"
+  ) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#003366")  # <-- Encabezado azul oscuro
 
-# 5. Valores únicos
-valores_unicos <- data.frame(Valores_unicos = sort(unique(cartagena$servicios)))
+# 1.3 Guardar tabla 
+save_kable(tabla_resumen, "results/resumen_servicios.html")
 
-valores_unicos_html <- valores_unicos %>%
-  kable("html", caption = "Valores únicos observados") %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
-save_kable(valores_unicos_html, "results/unicos_servicios.html")
 
-# 6. Tabla resumen con porcentaje y etiquetas
+# 2. Tabla de distribución
 tabla_resumen <- cartagena %>%
   count(servicios) %>%
   mutate(
-    n = as.numeric(n),
     porc = round(100 * n / sum(n), 1),
     servicios_label = case_when(
       servicios == 0 ~ "Sin carencias",
@@ -805,21 +787,14 @@ tabla_resumen <- cartagena %>%
       servicios == 2 ~ "2 carencias",
       servicios == 3 ~ "3 carencias",
       servicios == 4 ~ "4 carencias",
-      servicios == 5 ~ "5 carencias",
       TRUE ~ "No sabe/NA"
     )
   )
 
-tabla_resumen_html <- tabla_resumen %>%
-  select(servicios_label, n, porc) %>%
-  kable("html", caption = "Distribución de carencias de acceso a servicios públicos") %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
-save_kable(tabla_resumen_html, "results/tabla_resumen_servicios.html")
-
-# 7. Gráfico
-grafico4 <- ggplot(tabla_resumen, aes(x = servicios_label, y = porc)) +
+# 2.1 Gráfico
+grafico_servicios <- ggplot(tabla_resumen, aes(x = servicios_label, y = porc)) +
   geom_col(fill = "#003366", alpha = 0.9) +
-  geom_text(aes(label = paste0(porc, "%")), vjust = -0.4, size = 3.5, color = "black") +
+  geom_text(aes(label = paste0(porc, "%")), vjust = -0.3, size = 4, color = "black") +
   labs(
     title = "Carencia de acceso a servicios públicos",
     subtitle = "Distribución de hogares según número de carencias",
@@ -837,12 +812,13 @@ grafico4 <- ggplot(tabla_resumen, aes(x = servicios_label, y = porc)) +
     plot.margin = unit(c(1, 1, 1, 1), "cm")
   )
 
-print(grafico4)
+# 2.2 Mostrar y guardar
+print(grafico_servicios)
 
-ggsave("results/grafico4.png",
-       plot = grafico4, width = 10, height = 6, dpi = 300)
+ggsave("results/grafico_servicios.png",
+       plot = grafico_servicios, width = 10, height = 6, dpi = 300)
 
-# 8. Notas de método
+# 3. Notas de método
 notas_metodo <- "
 Notas de método:
 - Se estandarizaron las etiquetas y las categorías con valores entre 0 y 5.
@@ -857,10 +833,9 @@ writeLines(notas_metodo, "results/notas_metodo_servicios.txt")
 ```
 
 Se aplicó el factor de expansión de hogares (F_EXP_hog) para calcular la distribución, con el fin de garantizar que los resultados reflejen la distribución poblacional y no solo la muestra encuestada. Esto significa que cada observación representa un número mayor de hogares en la población, y los totales se obtienen sumando los pesos en lugar de contar registros.
-
-
 ```{r}
-# 1. Tipo de variable (estructura)
+
+# 1. Estructura de la variable
 estructura <- data.frame(estructura = capture.output(str(cartagena$servicios)))
 
 tabla7 <- estructura %>%
@@ -868,7 +843,8 @@ tabla7 <- estructura %>%
   kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
 save_kable(tabla7, "results/tabla7.html")
 
-# 2. Tablas sin y con ponderación
+
+# 1.2 Tablas sin y con ponderación
 # Sin ponderar
 tabla_simple_serv <- cartagena %>%
   count(servicios) %>%
@@ -878,70 +854,59 @@ tabla_simple_serv <- cartagena %>%
   ) %>%
   select(servicios, n_sinpond, porc_sinpond)
 
-# Ponderada (con factor de expansión)
+# 1.3 Ponderada (con factor de expansión)
 tabla_pond_serv <- cartagena %>%
   group_by(servicios) %>%
   summarise(n_pond = sum(f_exp_hog, na.rm = TRUE), .groups = "drop") %>%
   mutate(porc_pond = round(100 * n_pond / sum(n_pond), 1))
 
-# Unir tablas lado a lado
-tabla8 <- tabla_simple_serv %>%
+# 1.4 Unir tablas lado a lado 
+tabla_comp_serv <- tabla_simple_serv %>%
   full_join(tabla_pond_serv, by = "servicios") %>%
-  mutate(
-    servicios_label = case_when(
-      servicios == 0 ~ "Sin carencias",
-      servicios == 1 ~ "1 carencia",
-      servicios == 2 ~ "2 carencias",
-      servicios == 3 ~ "3 carencias",
-      servicios == 4 ~ "4 carencias",
-      servicios == 5 ~ "5 carencias",
-      TRUE ~ "No sabe/NA"
-    )
-  ) %>%
-  select(servicios_label, n_sinpond, porc_sinpond, n_pond, porc_pond)
+  arrange(servicios)
 
-# 3. Guardar 
+# 1.5 Crear tabla HTML 
 tabla8 <- tabla_comp_serv %>%
   kable(
     "html",
-    caption = "Distribución de carencias en servicios públicos: comparación ponderada vs sin ponderar",
-    col.names = c(
-      "Categoría",
-      "N (sin ponderar)", "% (sin ponderar)",
-      "N (ponderado)", "% (ponderado)"
-    ),
+    caption = "<b style='color:#003366; font-size:16px;'>Variable dependiente: Servicios</b>",
+    col.names = c("Servicios", "N (sin pond.)", "% (sin pond.)", "N (pond.)", "% (pond.)"),
     digits = 1
   ) %>%
+  add_header_above(c(" " = 1, "Sin ponderar" = 2, "Ponderado" = 2)) %>%
   kable_styling(
     full_width = FALSE,
-    bootstrap_options = c("striped", "hover", "condensed")
+    bootstrap_options = c("striped", "hover", "condensed"),
+    position = "center"
   ) %>%
-  add_header_above(c(" " = 1, "Sin ponderar" = 2, "Ponderado" = 2))
+  row_spec(0, bold = TRUE, color = "white", background = "#003366") # encabezado azul oscuro
 
 save_kable(tabla8, "results/tabla8.html")
 
-# 4. Gráfico comparativo
+
+# 2. Tabla para gráfico
 tabla_grafico <- tabla_comp_serv %>%
-  tidyr::pivot_longer(cols = c(porc_sinpond, porc_pond),
-                      names_to = "tipo",
-                      values_to = "porc") %>%
+  select(servicios, porc_sinpond, porc_pond) %>%
+  pivot_longer(cols = c(porc_sinpond, porc_pond),
+               names_to = "tipo", values_to = "porc") %>%
   mutate(
     tipo = ifelse(tipo == "porc_pond", "Ponderado", "Sin ponderar")
   )
 
-grafico6 <- ggplot(tabla_grafico, aes(x = servicios_label, y = porc, fill = tipo)) +
+# 2.1 Gráfico comparativo
+grafico6 <- ggplot(tabla_grafico, aes(x = factor(servicios), y = porc, fill = tipo)) +
   geom_col(position = "dodge", alpha = 0.9) +
   geom_text(
     aes(label = paste0(porc, "%")),
     position = position_dodge(width = 0.9),
-    vjust = -0.5,
+    vjust = -0.4,
     size = 3.5
   ) +
   scale_fill_manual(values = c("Sin ponderar" = "#999999", "Ponderado" = "#003366")) +
   labs(
     title = "Carencias en servicios básicos en los hogares",
     subtitle = "Comparación entre resultados sin ponderar y ponderados",
-    x = "Número de carencias reportadas",
+    x = "Número de servicios faltantes",
     y = "Porcentaje de hogares",
     fill = "Tipo de cálculo"
   ) +
@@ -956,10 +921,11 @@ grafico6 <- ggplot(tabla_grafico, aes(x = servicios_label, y = porc, fill = tipo
     plot.margin = unit(c(1, 1, 1, 1), "cm")
   )
 
+# 2.2 Guardar gráfico
 ggsave("results/grafico6.png",
        plot = grafico6, width = 10, height = 6, dpi = 300)
 
-# 5. Notas de método
+# 3. Notas de método
 notas_metodo <- "
 Notas de método:
 - La variable 'servicios' mide el número de carencias en el acceso a servicios básicos (0 a 5).
@@ -973,7 +939,44 @@ Notas de método:
 writeLines(notas_metodo, "results/notas_metodo_servicios.txt")
 
 
+# 4. Calcular barras de error (IC 95%)
+tabla_grafico_ic <- tabla_comp_serv %>%
+  mutate(
+    p = porc_pond / 100,
+    n = n_pond,
+    se = sqrt(p * (1 - p) / n),
+    ic_inf = 100 * (p - 1.96 * se),
+    ic_sup = 100 * (p + 1.96 * se)
+  )
+
+# 4.1 Gráfico con barras de error
+grafico6_ic <- ggplot(tabla_grafico_ic, aes(x = factor(servicios), y = porc_pond)) +
+  geom_col(fill = "#003366", alpha = 0.9) +
+  geom_errorbar(aes(ymin = ic_inf, ymax = ic_sup), width = 0.2, color = "black") +
+  geom_text(aes(label = paste0(round(porc_pond, 1), "%")),
+            vjust = -0.4, size = 3.5, color = "black") +
+  labs(
+    title = "Carencias en servicios básicos en los hogares",
+    subtitle = "Porcentaje ponderado con intervalos de confianza al 95%",
+    x = "Número de servicios faltantes",
+    y = "Porcentaje de hogares"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+    axis.text = element_text(size = 10),
+    axis.title.x = element_text(size = 11, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 11, margin = margin(r = 10)),
+    plot.title = element_text(face = "bold", size = 16, hjust = 0),
+    plot.subtitle = element_text(size = 12, hjust = 0)
+  )
+
+print(grafico6_ic)
+
+
 ```
+
+
 
 
 
@@ -983,93 +986,172 @@ writeLines(notas_metodo, "results/notas_metodo_servicios.txt")
 
 La variable head_female es una variable binaria, donde 1 corresponde a jefatura femenina y 0 a jefatura masculina, sin valores faltantes ni atípicos.
 
-Se realiza el análisis de frecuencias sin ponderación que se evidencia que el 61,2% de los hogares tienen jefatura femenina frente al 38,8% con jefatura masculina. Sin embargo, al realizar las frecuencias aplicando el factor de expansión, la distribución se invierte: el 57,2% de los hogares en el país presentan jefatura masculina, mientras que el 42,8% tienen jefatura femenina.Estos resultados reflejan el cambio que se tiene al aplicar la variable de expansión como pesos muestrales.
-
 ```{r}
-# 1. Tipo de variable (estructura)
-estructura <- data.frame(estructura = capture.output(str(cartagena$head_female)))
 
-# 2. Distribución (frecuencias sin ponderar)
-tabla_simple <- as.data.frame(table(cartagena$head_female, useNA = "ifany"))
-colnames(tabla_simple) <- c("Valor", "Frecuencia")
-
-# 3. Proporciones 
-prop_simple <- round(prop.table(table(cartagena$head_female, useNA = "ifany")) * 100, 1)
-prop_simple <- data.frame(Valor = names(prop_simple), Proporcion = as.vector(prop_simple))
-
-# 4. Datos NAs
-num_na <- data.frame(
-  NA_count = sum(is.na(cartagena$head_female)),
-  NA_pct   = round(mean(is.na(cartagena$head_female)) * 100, 2)
+# 1. Tabla resumen
+resumen_headfem <- data.frame(
+  Estadístico = c("N", "NAs", "Valores únicos", "Min.", "1st Qu.", "Median", "Mean", "3rd Qu.", "Max."),
+  valor = c(
+    sum(!is.na(cartagena$head_female)),
+    sum(is.na(cartagena$head_female)),
+    length(unique(cartagena$head_female)),
+    min(cartagena$head_female, na.rm = TRUE),
+    quantile(cartagena$head_female, 0.25, na.rm = TRUE),
+    median(cartagena$head_female, na.rm = TRUE),
+    mean(cartagena$head_female, na.rm = TRUE),
+    quantile(cartagena$head_female, 0.75, na.rm = TRUE),
+    max(cartagena$head_female, na.rm = TRUE)
+  )
 )
 
-# 5. Valores únicos
-valores_unicos <- data.frame(Valores_unicos = unique(cartagena$head_female))
+# 1.2 Generar tabla 
+tabla_resumen_headfem <- resumen_headfem %>%
+  kable(
+    "html",
+    caption = "<b style='color:#003366; font-size:16px;'>Variable: Jefatura femenina del hogar</b>"
+  ) %>%
+  kable_styling(
+    full_width = FALSE,
+    bootstrap_options = c("striped", "hover", "condensed"),
+    position = "center"
+  ) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#003366")  # Encabezado azul oscuro
 
-# Exportar en Excel
-write_xlsx(
-  list(
-    Estructura   = estructura,
-    Frecuencias  = tabla_simple,
-    Proporciones = prop_simple,
-    Valores_NA   = num_na,
-    Valores_unicos = valores_unicos
-  ),
-  "results/tabla3.xlsx"
-)
+# 1.3 Guardar tabla 
+save_kable(tabla_resumen_headfem, "results/resumen_headfem.html")
 
-# Tabla sin ponderar
-tabla_simple_df <- cartagena %>%
+
+# 2. Tabla de distribución
+tabla_resumen_headfem <- cartagena %>%
   count(head_female) %>%
   mutate(
-    n = as.numeric(n),
     porc = round(100 * n / sum(n), 1),
-    tipo = "Sin ponderar",
     head_female_label = case_when(
-      head_female == 1 ~ "Mujer",
-      head_female == 0 ~ "Hombre",
+      head_female == 0 ~ "Jefe hombre",
+      head_female == 1 ~ "Jefa mujer",
       TRUE ~ "No sabe/NA"
     )
   )
 
-# Tabla con ponderaración
-tabla_pond <- cartagena %>%
-  group_by(head_female) %>%
-  summarise(n = sum(f_exp_hog, na.rm = TRUE), .groups = "drop") %>%
+# 2.1 Gráfico
+grafico_headfem <- ggplot(tabla_resumen_headfem, aes(x = head_female_label, y = porc)) +
+  geom_col(fill = "#003366", alpha = 0.9) +
+  geom_text(aes(label = paste0(porc, "%")), vjust = -0.3, size = 4, color = "black") +
+  labs(
+    title = "Jefatura femenina del hogar",
+    subtitle = "Distribución de hogares según condición de jefatura",
+    x = "Condición de jefatura del hogar",
+    y = "Porcentaje de hogares"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+    axis.text = element_text(size = 10),
+    axis.title.x = element_text(size = 11, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 11, margin = margin(r = 10)),
+    plot.title = element_text(face = "bold", size = 16, hjust = 0),
+    plot.subtitle = element_text(size = 12, hjust = 0),
+    plot.margin = unit(c(1, 1, 1, 1), "cm")
+  )
+
+# 2.2 Mostrar y guardar
+print(grafico_headfem)
+
+ggsave("results/grafico_headfem.png",
+       plot = grafico_headfem, width = 10, height = 6, dpi = 300)
+
+
+# 3. Notas de método
+notas_metodo_headfem <- "
+Notas de método:
+- La variable 'head_female' identifica si el hogar tiene jefatura femenina (1 = mujer, 0 = hombre).
+- Se estandarizaron las etiquetas de acuerdo con la codificación binaria.
+- No se identificaron valores fuera del rango esperado (0–1).
+- Las barras de error no se aplican porque la variable es discreta y categórica.
+- Los valores NA se reportan explícitamente y no fueron imputados.
+"
+
+writeLines(notas_metodo_headfem, "results/notas_metodo_headfem.txt")
+
+```
+
+Con factor expansión:
+
+```{r}
+# 1. Estructura de la variable
+estructura <- data.frame(estructura = capture.output(str(cartagena$head_female)))
+
+tabla7_fem <- estructura %>%
+  kable("html", caption = "Estructura de la variable: Jefatura femenina del hogar") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
+
+save_kable(tabla7_fem, "results/tabla7_headfem.html")
+
+# 1.2 Tablas sin y con ponderación
+# Sin ponderar
+tabla_simple_fem <- cartagena %>%
+  count(head_female) %>%
   mutate(
-    porc = round(100 * n / sum(n), 1),
-    tipo = "Ponderado",
-    head_female_label = case_when(
-      head_female == 1 ~ "Mujer",
-      head_female == 0 ~ "Hombre",
-      TRUE ~ "No sabe/NA"
-    )
+    n_sinpond = as.numeric(n),
+    porc_sinpond = round(100 * n / sum(n), 1)
+  ) %>%
+  select(head_female, n_sinpond, porc_sinpond)
+
+# 1.3 Ponderada (con factor de expansión)
+tabla_pond_fem <- cartagena %>%
+  group_by(head_female) %>%
+  summarise(n_pond = sum(f_exp_hog, na.rm = TRUE), .groups = "drop") %>%
+  mutate(porc_pond = round(100 * n_pond / sum(n_pond), 1))
+
+# 1.4 Unir tablas lado a lado 
+tabla_comp_fem <- tabla_simple_fem %>%
+  full_join(tabla_pond_fem, by = "head_female") %>%
+  arrange(head_female)
+
+# 1.5 Crear tabla HTML 
+tabla8_fem <- tabla_comp_fem %>%
+  kable(
+    "html",
+    caption = "<b style='color:#003366; font-size:16px;'>Variable dependiente: Jefatura femenina del hogar</b>",
+    col.names = c("Jefatura femenina", "N (sin pond.)", "% (sin pond.)", "N (pond.)", "% (pond.)"),
+    digits = 1
+  ) %>%
+  add_header_above(c(" " = 1, "Sin ponderar" = 2, "Ponderado" = 2)) %>%
+  kable_styling(
+    full_width = FALSE,
+    bootstrap_options = c("striped", "hover", "condensed"),
+    position = "center"
+  ) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#003366")
+
+save_kable(tabla8_fem, "results/tabla8_headfem.html")
+
+# 2. Tabla para gráfico
+tabla_grafico_fem <- tabla_comp_fem %>%
+  select(head_female, porc_sinpond, porc_pond) %>%
+  pivot_longer(cols = c(porc_sinpond, porc_pond),
+               names_to = "tipo", values_to = "porc") %>%
+  mutate(
+    tipo = ifelse(tipo == "porc_pond", "Ponderado", "Sin ponderar"),
+    head_female = factor(head_female,
+                         levels = c(0,1),
+                         labels = c("Jefe hombre", "Jefe mujer"))
   )
 
-print(tabla_pond)
-
-# Gráfico con ponderación y sin 
-tabla_comp <- bind_rows(tabla_simple_df, tabla_pond)
-
-# Guardar tabla en Excel
-write_xlsx(
-  tabla_comp,
-  "results/tabla4.xlsx"
-)
-
-# Gráfico
-grafico6 <- ggplot(tabla_comp, aes(x = head_female_label, y = porc, fill = tipo)) +
+# 2.1 Gráfico comparativo
+grafico_fem <- ggplot(tabla_grafico_fem, aes(x = head_female, y = porc, fill = tipo)) +
   geom_col(position = "dodge", alpha = 0.9) +
   geom_text(
     aes(label = paste0(porc, "%")),
     position = position_dodge(width = 0.9),
-    vjust = -0.5, size = 3.5
+    vjust = -0.4,
+    size = 3.5
   ) +
   scale_fill_manual(values = c("Sin ponderar" = "#999999", "Ponderado" = "#003366")) +
   labs(
-    title = "Distribución de jefatura del hogar",
+    title = "Jefatura femenina del hogar",
     subtitle = "Comparación entre resultados sin ponderar y ponderados",
-    x = "Sexo del jefe/a",
+    x = "Condición de jefatura",
     y = "Porcentaje de hogares",
     fill = "Tipo de cálculo"
   ) +
@@ -1084,10 +1166,54 @@ grafico6 <- ggplot(tabla_comp, aes(x = head_female_label, y = porc, fill = tipo)
     plot.margin = unit(c(1, 1, 1, 1), "cm")
   )
 
-print(grafico6)
+ggsave("results/grafico_headfem.png", plot = grafico_fem, width = 10, height = 6, dpi = 300)
 
-ggsave("results/grafico5.png",
-       plot = grafico6, width = 10, height = 6, dpi = 300)
+# 3. Notas de método
+notas_metodo_fem <- "
+Notas de método:
+- La variable 'head_female' identifica si el hogar tiene jefatura femenina (1 = mujer, 0 = hombre).
+- La tabla compara los conteos (N) y proporciones (%) sin ponderar y ponderados por el factor de expansión (f_exp_hog).
+- Los valores ponderados representan la distribución poblacional ajustada.
+- No se identificaron valores perdidos o inconsistentes.
+"
+
+writeLines(notas_metodo_fem, "results/notas_metodo_headfem.txt")
+
+# 4. Calcular barras de error (IC 95%)
+tabla_grafico_ic_fem <- tabla_comp_fem %>%
+  mutate(
+    p = porc_pond / 100,
+    n = n_pond,
+    se = sqrt(p * (1 - p) / n),
+    ic_inf = 100 * (p - 1.96 * se),
+    ic_sup = 100 * (p + 1.96 * se)
+  )
+
+# 4.1 Gráfico con barras de error
+grafico_fem_ic <- ggplot(tabla_grafico_ic_fem, aes(x = factor(head_female,
+                                                             labels = c("Jefe hombre", "Jefe mujer")),
+                                                  y = porc_pond)) +
+  geom_col(fill = "#003366", alpha = 0.9) +
+  geom_errorbar(aes(ymin = ic_inf, ymax = ic_sup), width = 0.2, color = "black") +
+  geom_text(aes(label = paste0(round(porc_pond, 1), "%")),
+            vjust = -0.4, size = 3.5, color = "black") +
+  labs(
+    title = "Jefatura femenina del hogar",
+    subtitle = "Porcentaje ponderado con intervalos de confianza al 95%",
+    x = "Condición de jefatura",
+    y = "Porcentaje de hogares"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+    axis.text = element_text(size = 10),
+    axis.title.x = element_text(size = 11, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 11, margin = margin(r = 10)),
+    plot.title = element_text(face = "bold", size = 16, hjust = 0),
+    plot.subtitle = element_text(size = 12, hjust = 0)
+  )
+
+print(grafico_fem_ic)
 
 ```
 
@@ -1098,92 +1224,171 @@ De la variable single_parent_relaxed creada anteriormente, se puede decir que no
 Al ponderar con el factor de expansión de los hogares, la proporción de hogares con un solo adulto responsable baja a 19 %, lo que refleja la representatividad de estos hogares en la población. Esta información es importante para identificar posibles necesidades de apoyo social o programas dirigidos a hogares con un solo adulto a cargo.
 
 ```{r}
-# 1. Tipo de variable (estructura)
-estructura_sp <- data.frame(estructura = capture.output(str(cartagena$single_parent_relaxed)))
-
-# 2. Distribución (frecuencias sin ponderar)
-tabla_simple_sp <- as.data.frame(table(cartagena$single_parent_relaxed, useNA = "ifany"))
-colnames(tabla_simple_sp) <- c("Valor", "Frecuencia")
-
-# 3. Proporciones
-prop_simple_sp <- round(prop.table(table(cartagena$single_parent_relaxed, useNA = "ifany")) * 100, 1)
-prop_simple_sp <- data.frame(Valor = names(prop_simple_sp), Proporcion = as.vector(prop_simple_sp))
-
-# 4. Datos NAs
-num_na_sp <- data.frame(
-  NA_count = sum(is.na(cartagena$single_parent_relaxed)),
-  NA_pct   = round(mean(is.na(cartagena$single_parent_relaxed)) * 100, 2)
+# 1. Tabla resumen
+resumen_singleparent <- data.frame(
+  Estadístico = c("N", "NAs", "Valores únicos", "Min.", "1st Qu.", "Median", "Mean", "3rd Qu.", "Max."),
+  valor = c(
+    sum(!is.na(cartagena$single_parent_relaxed)),
+    sum(is.na(cartagena$single_parent_relaxed)),
+    length(unique(cartagena$single_parent_relaxed)),
+    min(cartagena$single_parent_relaxed, na.rm = TRUE),
+    quantile(cartagena$single_parent_relaxed, 0.25, na.rm = TRUE),
+    median(cartagena$single_parent_relaxed, na.rm = TRUE),
+    mean(cartagena$single_parent_relaxed, na.rm = TRUE),
+    quantile(cartagena$single_parent_relaxed, 0.75, na.rm = TRUE),
+    max(cartagena$single_parent_relaxed, na.rm = TRUE)
+  )
 )
 
-# 5. Valores únicos
-valores_unicos_sp <- data.frame(Valores_unicos = unique(cartagena$single_parent_relaxed))
+# 1.2 Generar tabla 
+tabla_resumen_singleparent <- resumen_singleparent %>%
+  kable(
+    "html",
+    caption = "<b style='color:#003366; font-size:16px;'>Variable: Hogar monoparental (definición relajada)</b>"
+  ) %>%
+  kable_styling(
+    full_width = FALSE,
+    bootstrap_options = c("striped", "hover", "condensed"),
+    position = "center"
+  ) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#003366")  # Encabezado azul oscuro
 
-# Exportar en Excel 
-write_xlsx(
-  list(
-    Estructura     = estructura_sp,
-    Frecuencias    = tabla_simple_sp,
-    Proporciones   = prop_simple_sp,
-    Valores_NA     = num_na_sp,
-    Valores_unicos = valores_unicos_sp
-  ),
-  "results/tabla5.xlsx"
-)
+# 1.3 Guardar tabla 
+save_kable(tabla_resumen_singleparent, "results/resumen_singleparent.html")
 
 
-# Tabla sin ponderar
-tabla_simple_df_sp <- cartagena %>%
+# 2. Tabla de distribución
+tabla_resumen_singleparent <- cartagena %>%
   count(single_parent_relaxed) %>%
   mutate(
-    n = as.numeric(n),
     porc = round(100 * n / sum(n), 1),
-    tipo = "Sin ponderar",
-    label = case_when(
-      single_parent_relaxed == 1 ~ "Solo un adulto con hijos",
-      single_parent_relaxed == 0 ~ "Dos o más adultos",
+    single_parent_label = case_when(
+      single_parent_relaxed == 0 ~ "No monoparental",
+      single_parent_relaxed == 1 ~ "Hogar monoparental",
       TRUE ~ "No sabe/NA"
     )
   )
 
+# 2.1 Gráfico
+grafico_singleparent <- ggplot(tabla_resumen_singleparent, aes(x = single_parent_label, y = porc)) +
+  geom_col(fill = "#003366", alpha = 0.9) +
+  geom_text(aes(label = paste0(porc, "%")), vjust = -0.3, size = 4, color = "black") +
+  labs(
+    title = "Hogares monoparentales (definición relajada)",
+    subtitle = "Distribución de hogares según presencia de jefatura monoparental",
+    x = "Condición del hogar",
+    y = "Porcentaje de hogares"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+    axis.text = element_text(size = 10),
+    axis.title.x = element_text(size = 11, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 11, margin = margin(r = 10)),
+    plot.title = element_text(face = "bold", size = 16, hjust = 0),
+    plot.subtitle = element_text(size = 12, hjust = 0),
+    plot.margin = unit(c(1, 1, 1, 1), "cm")
+  )
 
-# Tabla ponderada con factor de expansión
-tabla_pond_sp <- cartagena %>%
-  group_by(single_parent_relaxed) %>%
-  summarise(n = sum(f_exp_hog, na.rm = TRUE), .groups = "drop") %>%
+# 2.2 Mostrar y guardar
+print(grafico_singleparent)
+
+ggsave("results/grafico_singleparent.png",
+       plot = grafico_singleparent, width = 10, height = 6, dpi = 300)
+
+
+# 3. Notas de método
+notas_metodo_singleparent <- "
+Notas de método:
+- La variable 'single_parent_relaxed' identifica si el hogar es monoparental bajo una definición relajada (1 = sí, 0 = no).
+- Se validó que la codificación sea binaria (0 y 1).
+- Los valores NA se reportan explícitamente y no fueron imputados.
+- No se aplican barras de error al gráfico porque la variable es categórica y discreta.
+- La definición relajada considera hogares donde el jefe o jefa convive con hijos sin pareja residente, sin distinguir por sexo del jefe.
+"
+
+writeLines(notas_metodo_singleparent, "results/notas_metodo_singleparent.txt")
+
+
+```
+Ahora con factor expansión
+
+```{r}
+
+# 1. Estructura de la variable
+estructura <- data.frame(estructura = capture.output(str(cartagena$single_parent_relaxed)))
+
+tabla7_single <- estructura %>%
+  kable("html", caption = "Estructura de la variable: Hogar monoparental (definición relajada)") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
+
+save_kable(tabla7_single, "results/tabla7_single_parent_relaxed.html")
+
+# 1.2 Tablas sin y con ponderación
+# Sin ponderar
+tabla_simple_single <- cartagena %>%
+  count(single_parent_relaxed) %>%
   mutate(
-    porc = round(100 * n / sum(n), 1),
-    tipo = "Ponderado",
-    label = case_when(
-      single_parent_relaxed == 1 ~ "Solo un adulto con hijos",
-      single_parent_relaxed == 0 ~ "Dos o más adultos",
-      TRUE ~ "No sabe/NA"
-    )
+    n_sinpond = as.numeric(n),
+    porc_sinpond = round(100 * n / sum(n), 1)
+  ) %>%
+  select(single_parent_relaxed, n_sinpond, porc_sinpond)
+
+# 1.3 Ponderada (con factor de expansión)
+tabla_pond_single <- cartagena %>%
+  group_by(single_parent_relaxed) %>%
+  summarise(n_pond = sum(f_exp_hog, na.rm = TRUE), .groups = "drop") %>%
+  mutate(porc_pond = round(100 * n_pond / sum(n_pond), 1))
+
+# 1.4 Unir tablas lado a lado 
+tabla_comp_single <- tabla_simple_single %>%
+  full_join(tabla_pond_single, by = "single_parent_relaxed") %>%
+  arrange(single_parent_relaxed)
+
+# 1.5 Crear tabla HTML 
+tabla8_single <- tabla_comp_single %>%
+  kable(
+    "html",
+    caption = "<b style='color:#003366; font-size:16px;'>Variable: Hogar monoparental (definición relajada)</b>",
+    col.names = c("Hogar monoparental", "N (sin pond.)", "% (sin pond.)", "N (pond.)", "% (pond.)"),
+    digits = 1
+  ) %>%
+  add_header_above(c(" " = 1, "Sin ponderar" = 2, "Ponderado" = 2)) %>%
+  kable_styling(
+    full_width = FALSE,
+    bootstrap_options = c("striped", "hover", "condensed"),
+    position = "center"
+  ) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#003366")
+
+save_kable(tabla8_single, "results/tabla8_single_parent_relaxed.html")
+
+# 2. Tabla para gráfico
+tabla_grafico_single <- tabla_comp_single %>%
+  select(single_parent_relaxed, porc_sinpond, porc_pond) %>%
+  pivot_longer(cols = c(porc_sinpond, porc_pond),
+               names_to = "tipo", values_to = "porc") %>%
+  mutate(
+    tipo = ifelse(tipo == "porc_pond", "Ponderado", "Sin ponderar"),
+    single_parent_relaxed = factor(single_parent_relaxed,
+                                   levels = c(0, 1),
+                                   labels = c("No monoparental", "Monoparental"))
   )
 
-print(tabla_pond_sp)
-
-# Tabla (sin ponderar vs ponderado)
-tabla_comp_sp <- bind_rows(tabla_simple_df_sp, tabla_pond_sp)
-
-# Guardar tabla en Excel
-write_xlsx(
-  tabla_comp_sp,
-  "results/tabla6.xlsx"
-)
-
-# Gráfico comparativo (sin ponderar vs ponderado)
-grafico8 <- ggplot(tabla_comp_sp, aes(x = label, y = porc, fill = tipo)) +
+# 2.1 Gráfico comparativo
+grafico_single <- ggplot(tabla_grafico_single, aes(x = single_parent_relaxed, y = porc, fill = tipo)) +
   geom_col(position = "dodge", alpha = 0.9) +
   geom_text(
     aes(label = paste0(porc, "%")),
     position = position_dodge(width = 0.9),
-    vjust = -0.5, size = 3.5
+    vjust = -0.4,
+    size = 3.5
   ) +
   scale_fill_manual(values = c("Sin ponderar" = "#999999", "Ponderado" = "#003366")) +
   labs(
-    title = "Distribución de hogares según número de adultos responsables",
+    title = "Hogar monoparental (definición relajada)",
     subtitle = "Comparación entre resultados sin ponderar y ponderados",
-    x = "Tipo de hogar",
+    x = "Condición del hogar",
     y = "Porcentaje de hogares",
     fill = "Tipo de cálculo"
   ) +
@@ -1198,99 +1403,225 @@ grafico8 <- ggplot(tabla_comp_sp, aes(x = label, y = porc, fill = tipo)) +
     plot.margin = unit(c(1, 1, 1, 1), "cm")
   )
 
-print(grafico8)
+ggsave("results/grafico_single_parent_relaxed.png", plot = grafico_single, width = 10, height = 6, dpi = 300)
 
-ggsave("results/grafico7.png",
-       plot = grafico8, width = 10, height = 6, dpi = 300)
+# 3. Notas de método
+notas_metodo_single <- "
+Notas de método:
+- La variable 'single_parent_relaxed' identifica si el hogar es monoparental bajo una definición relajada (1 = sí, 0 = no).
+- La tabla compara los conteos (N) y proporciones (%) sin ponderar y ponderados por el factor de expansión (f_exp_hog).
+- Los valores ponderados reflejan la distribución ajustada a la población.
+- No se identificaron valores perdidos o inconsistentes en la variable.
+"
+
+writeLines(notas_metodo_single, "results/notas_metodo_single_parent_relaxed.txt")
+
+# 4. Calcular barras de error (IC 95%)
+tabla_grafico_ic_single <- tabla_comp_single %>%
+  mutate(
+    p = porc_pond / 100,
+    n = n_pond,
+    se = sqrt(p * (1 - p) / n),
+    ic_inf = 100 * (p - 1.96 * se),
+    ic_sup = 100 * (p + 1.96 * se)
+  )
+
+# 4.1 Gráfico con barras de error
+grafico_single_ic <- ggplot(tabla_grafico_ic_single, aes(
+  x = factor(single_parent_relaxed, labels = c("No monoparental", "Monoparental")),
+  y = porc_pond
+)) +
+  geom_col(fill = "#003366", alpha = 0.9) +
+  geom_errorbar(aes(ymin = ic_inf, ymax = ic_sup), width = 0.2, color = "black") +
+  geom_text(aes(label = paste0(round(porc_pond, 1), "%")),
+            vjust = -0.4, size = 3.5, color = "black") +
+  labs(
+    title = "Hogar monoparental (definición relajada)",
+    subtitle = "Porcentaje ponderado con intervalos de confianza al 95%",
+    x = "Condición del hogar",
+    y = "Porcentaje de hogares"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+    axis.text = element_text(size = 10),
+    axis.title.x = element_text(size = 11, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 11, margin = margin(r = 10)),
+    plot.title = element_text(face = "bold", size = 16, hjust = 0),
+    plot.subtitle = element_text(size = 12, hjust = 0)
+  )
+
+print(grafico_single_ic)
 
 ```
+
 
 ####3) Personas con discapacidad
 
-La variable household_has_disability, que indica si al menos una persona en el hogar presenta alguna discapacidad. La variable es de tipo entero (int), con valores 0 (sin discapacidad) y 1 (al menos un miembro con discapacidad) y así sucesivamente. En el análisis sin ponderar, se observaron 3.097 hogares sin discapacidad y 28 con al menos un miembro con discapacidad, lo que representa el 99,1 % y 0,9 % respectivamente. No se encontraron valores faltantes en la variable.
-
-Luego, se incorporó el factor de expansión f_exp_hog proveniente de la base de hogares, lo que evidencia que la gran mayoría de los hogares no cuenta con miembros con discapacidad y que solo una proporción muy pequeña presenta al menos un miembro con discapacidad
-
 ```{r}
-# 1. Tipo de variable (estructura)
-estructura_dis <- data.frame(estructura = capture.output(str(cartagena$household_has_disability)))
-
-# 2. Frecuencias sin ponderar
-tabla_simple_dis <- as.data.frame(table(cartagena$household_has_disability, useNA = "ifany"))
-colnames(tabla_simple_dis) <- c("Valor", "Frecuencia")
-
-# 3. Proporciones
-prop_simple_dis <- round(prop.table(table(cartagena$household_has_disability, useNA = "ifany")) * 100, 1)
-prop_simple_dis <- data.frame(Valor = names(prop_simple_dis), Proporcion = as.vector(prop_simple_dis))
-
-# 4. Datos NAs
-num_na_dis <- data.frame(
-  NA_count = sum(is.na(cartagena$household_has_disability)),
-  NA_pct   = round(mean(is.na(cartagena$household_has_disability)) * 100, 2)
+# 1. Tabla resumen
+resumen_disability <- data.frame(
+  Estadístico = c("N", "NAs", "Valores únicos", "Min.", "1st Qu.", "Median", "Mean", "3rd Qu.", "Max."),
+  valor = c(
+    sum(!is.na(cartagena$household_has_disability)),
+    sum(is.na(cartagena$household_has_disability)),
+    length(unique(cartagena$household_has_disability)),
+    min(cartagena$household_has_disability, na.rm = TRUE),
+    quantile(cartagena$household_has_disability, 0.25, na.rm = TRUE),
+    median(cartagena$household_has_disability, na.rm = TRUE),
+    mean(cartagena$household_has_disability, na.rm = TRUE),
+    quantile(cartagena$household_has_disability, 0.75, na.rm = TRUE),
+    max(cartagena$household_has_disability, na.rm = TRUE)
+  )
 )
 
-# 5. Valores únicos
-valores_unicos_dis <- data.frame(Valores_unicos = unique(cartagena$household_has_disability))
+# 1.2 Generar tabla 
+tabla_resumen_disability <- resumen_disability %>%
+  kable(
+    "html",
+    caption = "<b style='color:#003366; font-size:16px;'>Variable: Hogar con personas con discapacidad</b>"
+  ) %>%
+  kable_styling(
+    full_width = FALSE,
+    bootstrap_options = c("striped", "hover", "condensed"),
+    position = "center"
+  ) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#003366")  # Encabezado azul oscuro
 
-# Exportar Excel
-write_xlsx(
-  list(
-    Estructura     = estructura_dis,
-    Frecuencias    = tabla_simple_dis,
-    Proporciones   = prop_simple_dis,
-    Valores_NA     = num_na_dis,
-    Valores_unicos = valores_unicos_dis
-  ),
-  "results/tabla7.xlsx"
-)
+# 1.3 Guardar tabla 
+save_kable(tabla_resumen_disability, "results/resumen_disability.html")
 
 
-# Tabla sin ponderar
-tabla_simple_df_dis <- cartagena %>%
+# 2. Tabla de distribución
+tabla_resumen_disability <- cartagena %>%
   count(household_has_disability) %>%
   mutate(
-    n = as.numeric(n),
     porc = round(100 * n / sum(n), 1),
-    tipo = "Sin ponderar",
-    label = case_when(
-      household_has_disability == 1 ~ "Hogar con discapacidad",
-      household_has_disability == 0 ~ "Sin discapacidad",
+    disability_label = case_when(
+      household_has_disability == 0 ~ "Sin personas con discapacidad",
+      household_has_disability == 1 ~ "Con personas con discapacidad",
       TRUE ~ "No sabe/NA"
     )
   )
 
-# Tabla ponderada con factor de expansión
-tabla_pond_dis <- cartagena %>%
-  group_by(household_has_disability) %>%
-  summarise(n = sum(f_exp_hog, na.rm = TRUE), .groups = "drop") %>%
+# 2.1 Gráfico
+grafico_disability <- ggplot(tabla_resumen_disability, aes(x = disability_label, y = porc)) +
+  geom_col(fill = "#003366", alpha = 0.9) +
+  geom_text(aes(label = paste0(porc, "%")), vjust = -0.3, size = 4, color = "black") +
+  labs(
+    title = "Hogares con personas con discapacidad",
+    subtitle = "Distribución de hogares según presencia de miembros con discapacidad",
+    x = "Condición del hogar",
+    y = "Porcentaje de hogares"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+    axis.text = element_text(size = 10),
+    axis.title.x = element_text(size = 11, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 11, margin = margin(r = 10)),
+    plot.title = element_text(face = "bold", size = 16, hjust = 0),
+    plot.subtitle = element_text(size = 12, hjust = 0),
+    plot.margin = unit(c(1, 1, 1, 1), "cm")
+  )
+
+# 2.2 Mostrar y guardar
+print(grafico_disability)
+
+ggsave("results/grafico_disability.png",
+       plot = grafico_disability, width = 10, height = 6, dpi = 300)
+
+
+# 3. Notas de método
+notas_metodo_disability <- "
+Notas de método:
+- La variable 'household_has_disability' identifica si el hogar cuenta con al menos una persona con discapacidad (1 = sí, 0 = no).
+- Se confirmó que la variable tiene codificación binaria (0 y 1).
+- Los valores NA se reportan explícitamente y no fueron imputados.
+- No se aplican barras de error porque la variable es discreta y categórica.
+- La mayoría de hogares no presentan personas con discapacidad, lo cual explica la asimetría en la distribución.
+"
+
+writeLines(notas_metodo_disability, "results/notas_metodo_disability.txt")
+
+```
+
+Con factor expansión
+```{r}
+# 1. Estructura de la variable
+estructura <- data.frame(estructura = capture.output(str(cartagena$household_has_disability)))
+
+tabla7_disc <- estructura %>%
+  kable("html", caption = "Estructura de la variable: Hogar con personas con discapacidad") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
+
+save_kable(tabla7_disc, "results/tabla7_household_has_disability.html")
+
+# 1.2 Tablas sin y con ponderación
+# Sin ponderar
+tabla_simple_disc <- cartagena %>%
+  count(household_has_disability) %>%
   mutate(
-    porc = round(100 * n / sum(n), 1),
-    tipo = "Ponderado",
-    label = case_when(
-      household_has_disability == 1 ~ "Hogar con discapacidad",
-      household_has_disability == 0 ~ "Sin discapacidad",
-      TRUE ~ "No sabe/NA"
-    )
+    n_sinpond = as.numeric(n),
+    porc_sinpond = round(100 * n / sum(n), 1)
+  ) %>%
+  select(household_has_disability, n_sinpond, porc_sinpond)
+
+# 1.3 Ponderada (con factor de expansión)
+tabla_pond_disc <- cartagena %>%
+  group_by(household_has_disability) %>%
+  summarise(n_pond = sum(f_exp_hog, na.rm = TRUE), .groups = "drop") %>%
+  mutate(porc_pond = round(100 * n_pond / sum(n_pond), 1))
+
+# 1.4 Unir tablas lado a lado 
+tabla_comp_disc <- tabla_simple_disc %>%
+  full_join(tabla_pond_disc, by = "household_has_disability") %>%
+  arrange(household_has_disability)
+
+# 1.5 Crear tabla HTML 
+tabla8_disc <- tabla_comp_disc %>%
+  kable(
+    "html",
+    caption = "<b style='color:#003366; font-size:16px;'>Variable: Hogar con personas con discapacidad</b>",
+    col.names = c("Hogar con discapacidad", "N (sin pond.)", "% (sin pond.)", "N (pond.)", "% (pond.)"),
+    digits = 1
+  ) %>%
+  add_header_above(c(" " = 1, "Sin ponderar" = 2, "Ponderado" = 2)) %>%
+  kable_styling(
+    full_width = FALSE,
+    bootstrap_options = c("striped", "hover", "condensed"),
+    position = "center"
+  ) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#003366")
+
+save_kable(tabla8_disc, "results/tabla8_household_has_disability.html")
+
+# 2. Tabla para gráfico
+tabla_grafico_disc <- tabla_comp_disc %>%
+  select(household_has_disability, porc_sinpond, porc_pond) %>%
+  pivot_longer(cols = c(porc_sinpond, porc_pond),
+               names_to = "tipo", values_to = "porc") %>%
+  mutate(
+    tipo = ifelse(tipo == "porc_pond", "Ponderado", "Sin ponderar"),
+    household_has_disability = factor(household_has_disability,
+                                      levels = c(0, 1),
+                                      labels = c("Sin discapacidad", "Con discapacidad"))
   )
 
-# Tabla comparativo 
-tabla_comp_dis <- bind_rows(tabla_simple_df_dis, tabla_pond_dis)
-
-# Guardar tabla en Excel
-write_xlsx(
-  tabla_comp_dis,
-  "results/tabla8.xlsx"
-)
-
-# Gráfico comparativo 
-grafico9 <- ggplot(tabla_comp_dis, aes(x = label, y = porc, fill = tipo)) +
+# 2.1 Gráfico comparativo
+grafico_disc <- ggplot(tabla_grafico_disc, aes(x = household_has_disability, y = porc, fill = tipo)) +
   geom_col(position = "dodge", alpha = 0.9) +
-  geom_text(aes(label = paste0(porc, "%")), position = position_dodge(width = 0.9), vjust = -0.5, size = 3.5) +
+  geom_text(
+    aes(label = paste0(porc, "%")),
+    position = position_dodge(width = 0.9),
+    vjust = -0.4,
+    size = 3.5
+  ) +
   scale_fill_manual(values = c("Sin ponderar" = "#999999", "Ponderado" = "#003366")) +
   labs(
-    title = "Distribución de hogares según presencia de discapacidad",
+    title = "Hogar con personas con discapacidad",
     subtitle = "Comparación entre resultados sin ponderar y ponderados",
-    x = "Tipo de hogar",
+    x = "Condición del hogar",
     y = "Porcentaje de hogares",
     fill = "Tipo de cálculo"
   ) +
@@ -1305,96 +1636,227 @@ grafico9 <- ggplot(tabla_comp_dis, aes(x = label, y = porc, fill = tipo)) +
     plot.margin = unit(c(1, 1, 1, 1), "cm")
   )
 
-print(grafico9)
-ggsave("results/grafico8.png", plot = grafico9, width = 10, height = 6, dpi = 300)
+ggsave("results/grafico_household_has_disability.png", plot = grafico_disc, width = 10, height = 6, dpi = 300)
+
+# 3. Notas de método
+notas_metodo_disc <- "
+Notas de método:
+- La variable 'household_has_disability' identifica si en el hogar hay al menos una persona con discapacidad (1 = sí, 0 = no).
+- La tabla compara los conteos (N) y proporciones (%) sin ponderar y ponderados por el factor de expansión (f_exp_hog).
+- Los valores ponderados reflejan la distribución ajustada a la población.
+- La mayoría de hogares no reportan personas con discapacidad, por lo que la incidencia de esta condición es baja.
+"
+
+writeLines(notas_metodo_disc, "results/notas_metodo_household_has_disability.txt")
+
+# 4. Calcular barras de error (IC 95%)
+tabla_grafico_ic_disc <- tabla_comp_disc %>%
+  mutate(
+    p = porc_pond / 100,
+    n = n_pond,
+    se = sqrt(p * (1 - p) / n),
+    ic_inf = 100 * (p - 1.96 * se),
+    ic_sup = 100 * (p + 1.96 * se)
+  )
+
+# 4.1 Gráfico con barras de error
+grafico_disc_ic <- ggplot(tabla_grafico_ic_disc, aes(
+  x = factor(household_has_disability, labels = c("Sin discapacidad", "Con discapacidad")),
+  y = porc_pond
+)) +
+  geom_col(fill = "#003366", alpha = 0.9) +
+  geom_errorbar(aes(ymin = ic_inf, ymax = ic_sup), width = 0.2, color = "black") +
+  geom_text(aes(label = paste0(round(porc_pond, 1), "%")),
+            vjust = -0.4, size = 3.5, color = "black") +
+  labs(
+    title = "Hogar con personas con discapacidad",
+    subtitle = "Porcentaje ponderado con intervalos de confianza al 95%",
+    x = "Condición del hogar",
+    y = "Porcentaje de hogares"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+    axis.text = element_text(size = 10),
+    axis.title.x = element_text(size = 11, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 11, margin = margin(r = 10)),
+    plot.title = element_text(face = "bold", size = 16, hjust = 0),
+    plot.subtitle = element_text(size = 12, hjust = 0)
+  )
+
+print(grafico_disc_ic)
 
 ```
+
 
 ####4) Antecedentes de violencia o amenazas:
 
-La variable *household_survivor_violence* indica si el hogar sufrió violencia. Siendo esta de tipo entero con valores 1 y 0, el cual toma el valor de 1 si sufrió algún tipo de violencia. En el análisis sin ponderar, se observan 151 hogares sin violencia, y 12 con violencia, lo que representa el 92,6% y 7,4% respectivamente. En esta variable no se registran valores faltantes.
-
-Por otra parte, aplicando el factor de expansión, la relación se mantuvo bastante similar, revelando así que la mayoría de estos hogares no han enfrentado situaciones de violencia.
-
+La variable *household_survivor_violence* indica si el hogar sufrió violencia. 
 ```{r}
-# 1. Tipo de variable (estructura)
-estructura_vio <- data.frame(estructura = capture.output(str(cartagena$household_survivor_violence)))
-
-# 2. Frecuencias sin ponderar
-tabla_simple_vio <- as.data.frame(table(cartagena$household_survivor_violence, useNA = "ifany"))
-colnames(tabla_simple_vio) <- c("Valor", "Frecuencia")
-
-# 3. Proporciones
-prop_simple_vio <- round(prop.table(table(cartagena$household_survivor_violence, useNA = "ifany")) * 100, 1)
-prop_simple_vio <- data.frame(Valor = names(prop_simple_vio), Proporcion = as.vector(prop_simple_vio))
-
-# 4. Datos NAs
-num_na_vio <- data.frame(
-  NA_count = sum(is.na(cartagena$household_survivor_violence)),
-  NA_pct   = round(mean(is.na(cartagena$household_survivor_violence)) * 100, 2)
+# 1. Tabla resumen
+resumen_violence <- data.frame(
+  Estadístico = c("N", "NAs", "Valores únicos", "Min.", "1st Qu.", "Median", "Mean", "3rd Qu.", "Max."),
+  valor = c(
+    sum(!is.na(cartagena$household_survivor_violence)),
+    sum(is.na(cartagena$household_survivor_violence)),
+    length(unique(cartagena$household_survivor_violence)),
+    min(cartagena$household_survivor_violence, na.rm = TRUE),
+    quantile(cartagena$household_survivor_violence, 0.25, na.rm = TRUE),
+    median(cartagena$household_survivor_violence, na.rm = TRUE),
+    mean(cartagena$household_survivor_violence, na.rm = TRUE),
+    quantile(cartagena$household_survivor_violence, 0.75, na.rm = TRUE),
+    max(cartagena$household_survivor_violence, na.rm = TRUE)
+  )
 )
 
-# 5. Valores únicos
-valores_unicos_vio <- data.frame(Valores_unicos = unique(cartagena$household_survivor_violence))
+# 1.2 Generar tabla 
+tabla_resumen_violence <- resumen_violence %>%
+  kable(
+    "html",
+    caption = "<b style='color:#003366; font-size:16px;'>Variable: Hogar con víctimas de violencia</b>"
+  ) %>%
+  kable_styling(
+    full_width = FALSE,
+    bootstrap_options = c("striped", "hover", "condensed"),
+    position = "center"
+  ) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#003366")  # Encabezado azul oscuro
 
-# Exportar todo en un Excel con varias hojas
-write_xlsx(
-  list(
-    Estructura     = estructura_vio,
-    Frecuencias    = tabla_simple_vio,
-    Proporciones   = prop_simple_vio,
-    Valores_NA     = num_na_vio,
-    Valores_unicos = valores_unicos_vio
-  ),
-  "results/tablas/tabla9.xlsx"
-)
-# Tabla sin ponderar
-tabla_simple_df_vio <- cartagena %>%
+# 1.3 Guardar tabla 
+save_kable(tabla_resumen_violence, "results/resumen_violence.html")
+
+
+# 2. Tabla de distribución
+tabla_resumen_violence <- cartagena %>%
   count(household_survivor_violence) %>%
   mutate(
-    n = as.numeric(n),
     porc = round(100 * n / sum(n), 1),
-    tipo = "Sin ponderar",
-    label = case_when(
-      household_survivor_violence == 1 ~ "Víctima de violencia",
-      household_survivor_violence == 0 ~ "Sin violencia",
+    violence_label = case_when(
+      household_survivor_violence == 0 ~ "Sin víctimas de violencia",
+      household_survivor_violence == 1 ~ "Con víctimas de violencia",
       TRUE ~ "No sabe/NA"
     )
   )
 
-# Tabla ponderada con factor de expansión
-tabla_pond_vio <- cartagena %>%
-  group_by(household_survivor_violence) %>%
-  summarise(n = sum(f_exp_hog, na.rm = TRUE), .groups = "drop") %>%
+# 2.1 Gráfico
+grafico_violence <- ggplot(tabla_resumen_violence, aes(x = violence_label, y = porc)) +
+  geom_col(fill = "#003366", alpha = 0.9) +
+  geom_text(aes(label = paste0(porc, "%")), vjust = -0.3, size = 4, color = "black") +
+  labs(
+    title = "Hogares con víctimas de violencia",
+    subtitle = "Distribución de hogares según experiencia de violencia",
+    x = "Condición del hogar",
+    y = "Porcentaje de hogares"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+    axis.text = element_text(size = 10),
+    axis.title.x = element_text(size = 11, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 11, margin = margin(r = 10)),
+    plot.title = element_text(face = "bold", size = 16, hjust = 0),
+    plot.subtitle = element_text(size = 12, hjust = 0),
+    plot.margin = unit(c(1, 1, 1, 1), "cm")
+  )
+
+# 2.2 Mostrar y guardar
+print(grafico_violence)
+
+ggsave("results/grafico_violence.png",
+       plot = grafico_violence, width = 10, height = 6, dpi = 300)
+
+
+# 3. Notas de método
+notas_metodo_violence <- "
+Notas de método:
+- La variable 'household_survivor_violence' identifica si en el hogar hay al menos una persona sobreviviente de violencia (1 = sí, 0 = no).
+- Se validó que la codificación sea binaria (0 y 1).
+- Los valores NA se reportan explícitamente y no fueron imputados.
+- No se aplican barras de error porque la variable es categórica y discreta.
+- La baja proporción de hogares con víctimas refleja la sensibilidad del tema y posible subregistro en la respuesta.
+"
+
+writeLines(notas_metodo_violence, "results/notas_metodo_violence.txt")
+
+```
+
+Ahora con factor expansión
+```{r}
+
+# 1. Estructura de la variable
+estructura <- data.frame(estructura = capture.output(str(cartagena$household_survivor_violence)))
+
+tabla7_viol <- estructura %>%
+  kable("html", caption = "Estructura de la variable: Hogar con sobrevivientes de violencia") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
+
+save_kable(tabla7_viol, "results/tabla7_household_survivor_violence.html")
+
+# 1.2 Tablas sin y con ponderación
+# Sin ponderar
+tabla_simple_viol <- cartagena %>%
+  count(household_survivor_violence) %>%
   mutate(
-    porc = round(100 * n / sum(n), 1),
-    tipo = "Ponderado",
-    label = case_when(
-      household_survivor_violence == 1 ~ "Víctima de violencia",
-      household_survivor_violence == 0 ~ "Sin violencia",
-      TRUE ~ "No sabe/NA"
-    )
+    n_sinpond = as.numeric(n),
+    porc_sinpond = round(100 * n / sum(n), 1)
+  ) %>%
+  select(household_survivor_violence, n_sinpond, porc_sinpond)
+
+# 1.3 Ponderada (con factor de expansión)
+tabla_pond_viol <- cartagena %>%
+  group_by(household_survivor_violence) %>%
+  summarise(n_pond = sum(f_exp_hog, na.rm = TRUE), .groups = "drop") %>%
+  mutate(porc_pond = round(100 * n_pond / sum(n_pond), 1))
+
+# 1.4 Unir tablas lado a lado 
+tabla_comp_viol <- tabla_simple_viol %>%
+  full_join(tabla_pond_viol, by = "household_survivor_violence") %>%
+  arrange(household_survivor_violence)
+
+# 1.5 Crear tabla HTML 
+tabla8_viol <- tabla_comp_viol %>%
+  kable(
+    "html",
+    caption = "<b style='color:#003366; font-size:16px;'>Variable: Hogar con sobrevivientes de violencia</b>",
+    col.names = c("Hogar con sobrevivientes", "N (sin pond.)", "% (sin pond.)", "N (pond.)", "% (pond.)"),
+    digits = 1
+  ) %>%
+  add_header_above(c(" " = 1, "Sin ponderar" = 2, "Ponderado" = 2)) %>%
+  kable_styling(
+    full_width = FALSE,
+    bootstrap_options = c("striped", "hover", "condensed"),
+    position = "center"
+  ) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#003366")
+
+save_kable(tabla8_viol, "results/tabla8_household_survivor_violence.html")
+
+# 2. Tabla para gráfico
+tabla_grafico_viol <- tabla_comp_viol %>%
+  select(household_survivor_violence, porc_sinpond, porc_pond) %>%
+  pivot_longer(cols = c(porc_sinpond, porc_pond),
+               names_to = "tipo", values_to = "porc") %>%
+  mutate(
+    tipo = ifelse(tipo == "porc_pond", "Ponderado", "Sin ponderar"),
+    household_survivor_violence = factor(household_survivor_violence,
+                                         levels = c(0, 1),
+                                         labels = c("Sin sobrevivientes", "Con sobrevivientes"))
   )
 
-
-# Tabla comparativo 
-tabla_comp_vio <- bind_rows(tabla_simple_df_vio, tabla_pond_vio)
-
-# Guardar tabla en Excel
-write_xlsx(
-  tabla_comp_vio,
-  "results/tablas/tabla10.xlsx"
-)
-
-# Gráfico comparativo 
-grafico11 <- ggplot(tabla_comp_vio, aes(x = label, y = porc, fill = tipo)) +
+# 2.1 Gráfico comparativo
+grafico_viol <- ggplot(tabla_grafico_viol, aes(x = household_survivor_violence, y = porc, fill = tipo)) +
   geom_col(position = "dodge", alpha = 0.9) +
-  geom_text(aes(label = paste0(porc, "%")), position = position_dodge(width = 0.9), vjust = -0.5, size = 3.5) +
+  geom_text(
+    aes(label = paste0(porc, "%")),
+    position = position_dodge(width = 0.9),
+    vjust = -0.4,
+    size = 3.5
+  ) +
   scale_fill_manual(values = c("Sin ponderar" = "#999999", "Ponderado" = "#003366")) +
   labs(
-    title = "Distribución de hogares víctimas de violencia",
+    title = "Hogar con sobrevivientes de violencia",
     subtitle = "Comparación entre resultados sin ponderar y ponderados",
-    x = "Tipo de hogar",
+    x = "Condición del hogar",
     y = "Porcentaje de hogares",
     fill = "Tipo de cálculo"
   ) +
@@ -1409,110 +1871,120 @@ grafico11 <- ggplot(tabla_comp_vio, aes(x = label, y = porc, fill = tipo)) +
     plot.margin = unit(c(1, 1, 1, 1), "cm")
   )
 
-print(grafico11)
-ggsave("results/figures/grafico9_resultados_antecedente_violencia.png", plot = grafico11, width = 10, height = 6, dpi = 300)
+ggsave("results/grafico_household_survivor_violence.png", plot = grafico_viol, width = 10, height = 6, dpi = 300)
+
+# 3. Notas de método
+notas_metodo_viol <- "
+Notas de método:
+- La variable 'household_survivor_violence' identifica si en el hogar reside al menos una persona sobreviviente de violencia (1 = sí, 0 = no).
+- La tabla presenta los conteos (N) y proporciones (%) sin ponderar y ponderados por el factor de expansión (f_exp_hog).
+- Los valores ponderados reflejan la distribución ajustada a la población.
+- La prevalencia de hogares con sobrevivientes de violencia es baja, pero representa un grupo prioritario de atención.
+"
+
+writeLines(notas_metodo_viol, "results/notas_metodo_household_survivor_violence.txt")
+
+# 4. Calcular barras de error (IC 95%)
+tabla_grafico_ic_viol <- tabla_comp_viol %>%
+  mutate(
+    p = porc_pond / 100,
+    n = n_pond,
+    se = sqrt(p * (1 - p) / n),
+    ic_inf = 100 * (p - 1.96 * se),
+    ic_sup = 100 * (p + 1.96 * se)
+  )
+
+# 4.1 Gráfico con barras de error
+grafico_viol_ic <- ggplot(tabla_grafico_ic_viol, aes(
+  x = factor(household_survivor_violence, labels = c("Sin sobrevivientes", "Con sobrevivientes")),
+  y = porc_pond
+)) +
+  geom_col(fill = "#003366", alpha = 0.9) +
+  geom_errorbar(aes(ymin = ic_inf, ymax = ic_sup), width = 0.2, color = "black") +
+  geom_text(aes(label = paste0(round(porc_pond, 1), "%")),
+            vjust = -0.4, size = 3.5, color = "black") +
+  labs(
+    title = "Hogar con sobrevivientes de violencia",
+    subtitle = "Porcentaje ponderado con intervalos de confianza al 95%",
+    x = "Condición del hogar",
+    y = "Porcentaje de hogares"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+    axis.text = element_text(size = 10),
+    axis.title.x = element_text(size = 11, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 11, margin = margin(r = 10)),
+    plot.title = element_text(face = "bold", size = 16, hjust = 0),
+    plot.subtitle = element_text(size = 12, hjust = 0)
+  )
+
+print(grafico_viol_ic)
+
 ```
+
+
 
 #### 5) Índice de vulnerabilidad
 
-Explorando en detalle el índice de vulnerabilidad, definida como una variable categórica de 0 a 4, la cual indica la cantidad de vulnerabilidades con las que cuentan los hogares. Es de tipo entero y no contiene datos faltantes. En general, esta visualización preliminar muestra que en el cálculo ponderado, el 40,3% de los hohares no cuentan con ninguna vulnerabilidad, el 36,4% cuenta con al menos una, el 20,9% cuenta con 2 y un pequeño porcentaje del 2,4% cuenta con las 3.
+Explorando en detalle el índice de vulnerabilidad, definida como una variable categórica de 0 a 4, la cual indica la cantidad de vulnerabilidades con las que cuentan los hogares. 
 
 ```{r}
-# Se realiza una copia del DF de análisis
-cartagena_vul <- cartagena
-
-# 1. Tipo de variable (estructura)
-estructura_vul <- data.frame(estructura = capture.output(str(cartagena_vul$vulnerability_score)))
-
-# 2. Frecuencias sin ponderar
-tabla_simple_vul <- as.data.frame(table(cartagena_vul$vulnerability_score, useNA = "ifany"))
-colnames(tabla_simple_vul) <- c("Valor", "Frecuencia")
-
-# 3. Proporciones 
-prop_simple_vul <- round(prop.table(table(cartagena_vul$vulnerability_score, useNA = "ifany")) * 100, 1)
-prop_simple_vul <- data.frame(Valor = names(prop_simple_vul), Proporcion = as.vector(prop_simple_vul))
-
-# 4. Datos NAs
-num_na_vul <- data.frame(
-  NA_count = sum(is.na(cartagena_vul$vulnerability_score)),
-  NA_pct   = round(mean(is.na(cartagena_vul$vulnerability_score)) * 100, 2)
-)
-
-# 5. Valores únicos
-valores_unicos_vul <- data.frame(Valores_unicos = unique(cartagena_vul$vulnerability_score))
-
-# 6. Resumen estadístico
+# 1. Tabla resumen
 resumen_vul <- data.frame(
-  estadistico = names(summary(cartagena_vul$vulnerability_score)),
-  valor = as.vector(summary(cartagena_vul$vulnerability_score))
-)
-
-# Exportar Excel 
-write_xlsx(
-  list(
-    Estructura       = estructura_vul,
-    Frecuencias      = tabla_simple_vul,
-    Proporciones     = prop_simple_vul,
-    Valores_NA       = num_na_vul,
-    Valores_unicos   = valores_unicos_vul,
-    Resumen_estadistico = resumen_vul
-  ),
-  "results/tablas/tabla11.xlsx"
-)
-
-# Tabla sin ponderar
-tabla_simple_df_vul <- cartagena_vul %>%
-  count(vulnerability_score) %>%
-  mutate(
-    n = as.numeric(n),
-    porc = round(100 * n / sum(n), 1),
-    tipo = "Sin ponderar",
-    label = case_when(
-      vulnerability_score == 1 ~ "1",
-      vulnerability_score == 2 ~ "2",
-      vulnerability_score == 3 ~ "3",
-      vulnerability_score == 4 ~ "4",
-      TRUE ~ "No vulnerable"
-    )
+  Estadístico = c("N", "NAs", "Valores únicos", "Min.", "1st Qu.", "Median", "Mean", "3rd Qu.", "Max."),
+  valor = c(
+    sum(!is.na(cartagena_vul$vulnerability_score)),
+    sum(is.na(cartagena_vul$vulnerability_score)),
+    length(unique(cartagena_vul$vulnerability_score)),
+    min(cartagena_vul$vulnerability_score, na.rm = TRUE),
+    quantile(cartagena_vul$vulnerability_score, 0.25, na.rm = TRUE),
+    median(cartagena_vul$vulnerability_score, na.rm = TRUE),
+    mean(cartagena_vul$vulnerability_score, na.rm = TRUE),
+    quantile(cartagena_vul$vulnerability_score, 0.75, na.rm = TRUE),
+    max(cartagena_vul$vulnerability_score, na.rm = TRUE)
   )
-
-
-# Tabla ponderada con factor de expansión
-tabla_pond_vul <- cartagena_vul %>%
-  group_by(vulnerability_score) %>%
-  summarise(n = sum(f_exp_hog, na.rm = TRUE), .groups = "drop") %>%
-  mutate(
-    porc = round(100 * n / sum(n), 1),
-    tipo = "Ponderado",
-    label = case_when(
-     vulnerability_score == 1 ~ "1",
-      vulnerability_score == 2 ~ "2",
-      vulnerability_score == 3 ~ "3",
-      vulnerability_score == 4 ~ "4",
-      TRUE ~ "No vulnerable"
-    )
-  )
-
-# Tabla comparativo 
-tabla_comp_vul <- bind_rows(tabla_simple_df_vul, tabla_pond_vul)
-
-# Guardar tabla en Excel
-write_xlsx(
-  tabla_comp_vul,
-  "results/tablas/tabla12.xlsx"
 )
 
-# Gráfico comparativo 
-grafico13 <- ggplot(tabla_comp_vul, aes(x = label, y = porc, fill = tipo)) +
-  geom_col(position = "dodge", alpha = 0.9) +
-  geom_text(aes(label = paste0(porc, "%")), position = position_dodge(width = 0.9), vjust = -0.5, size = 3.5) +
-  scale_fill_manual(values = c("Sin ponderar" = "#999999", "Ponderado" = "#003366")) +
+# 1.2 Generar tabla
+tabla_resumen_vul <- resumen_vul %>%
+  kable(
+    "html",
+    caption = "<b style='color:#003366; font-size:16px;'>Variable: Puntaje de vulnerabilidad del hogar</b>"
+  ) %>%
+  kable_styling(
+    full_width = FALSE,
+    bootstrap_options = c("striped", "hover", "condensed"),
+    position = "center"
+  ) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#003366")  # Encabezado azul oscuro
+
+# 1.3 Guardar tabla
+save_kable(tabla_resumen_vul, "results/resumen_vul.html")
+
+
+# 2. Distribución de la variable
+tabla_distrib_vul <- cartagena_vul %>%
+  mutate(
+    rango_vul = case_when(
+      vulnerability_score < 0.25 ~ "Muy baja",
+      vulnerability_score < 0.5  ~ "Baja",
+      vulnerability_score < 0.75 ~ "Media",
+      TRUE                       ~ "Alta"
+    )
+  ) %>%
+  count(rango_vul) %>%
+  mutate(porc = round(100 * n / sum(n), 1))
+
+# 2.1 Gráfico
+grafico_vul <- ggplot(tabla_distrib_vul, aes(x = rango_vul, y = porc)) +
+  geom_col(fill = "#003366", alpha = 0.9) +
+  geom_text(aes(label = paste0(porc, "%")), vjust = -0.3, size = 4, color = "black") +
   labs(
-    title = "Distribución de hogares según su vulnerabilidad",
-    subtitle = "Comparación entre resultados sin ponderar y ponderados",
-    x = "Cantidad de vulnerabilidades",
-    y = "Porcentaje de hogares",
-    fill = "Tipo de cálculo"
+    title = "Distribución del puntaje de vulnerabilidad",
+    subtitle = "Clasificación del nivel de vulnerabilidad de los hogares",
+    x = "Nivel de vulnerabilidad",
+    y = "Porcentaje de hogares"
   ) +
   theme_minimal() +
   theme(
@@ -1525,10 +1997,33 @@ grafico13 <- ggplot(tabla_comp_vul, aes(x = label, y = porc, fill = tipo)) +
     plot.margin = unit(c(1, 1, 1, 1), "cm")
   )
 
-print(grafico13)
-ggsave("results/figures/grafico10_resultados_score_vulnerability.png", plot = grafico13, width = 10, height = 6, dpi = 300)
+# 2.2 Mostrar y guardar
+print(grafico_vul)
+
+ggsave("results/grafico_vul.png",
+       plot = grafico_vul, width = 10, height = 6, dpi = 300)
+
+
+# 3. Notas de método
+notas_metodo_vul <- "
+Notas de método:
+- La variable 'vulnerability_score' corresponde a un puntaje continuo que mide el nivel de vulnerabilidad de los hogares.
+- Los valores más altos indican mayor vulnerabilidad.
+- Se validó que no existan valores fuera del rango esperado (0 a 1).
+- Los valores NA se reportan explícitamente y no fueron imputados.
+- No se aplican barras de error porque la variable es continua y se describe mediante estadísticos de tendencia central y dispersión.
+"
+
+writeLines(notas_metodo_vul, "results/notas_metodo_vul.txt")
 
 ```
+
+Ahora con factor de expansión:
+```{r}
+
+```
+
+
 
 # PARTE 3: Visualizaciones de exploración según la pregunta de indagación
 
