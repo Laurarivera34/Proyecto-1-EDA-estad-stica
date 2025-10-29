@@ -621,20 +621,21 @@ save_kable(tabla4, "results/tabla4.html")
 Finalmente, el índice de vulnerabilidad es un puntaje aditivo (0–4) que suma cuatro puntos: (1) jefatura del hogar femenina; (2) hogar mono-parental, definido como jefe/a sin cónyuge y con hijos, o presencia de “Papá/Mamá” con estado civil soltero/separado/divorciado/viudo; (3) al menos una persona con discapacidad en el hogar; y (4) antecedente de violencia contra miembros del hogar (proteccion1006_v_ctima_de_violencia_amenazas). El código incluye una comparación de Cartagéna y el país.
 
 ```{r}
-# 1) Construcción del score de vulnerabilidad
+# 1) Construcción del score de vulnerabilidad (sin discapacidad)
 hogares_vulnerabilidad <- hogares_out %>%
   select(id_hogar, mpio, head_female, f_exp_hog) %>%
   left_join(hog_single %>% select(id_hogar, single_parent_relaxed), by = "id_hogar") %>%
-  left_join(hogares_disability %>% select(id_hogar, household_has_disability), by = "id_hogar") %>%
+  left_join(hogares_disability %>% select(id_hogar, household_has_disability), by = "id_hogar") %>%  # se mantiene para el análisis univariado
   left_join(hogares_violencia_amenazas %>% select(id_hogar, household_survivor_violence), by = "id_hogar") %>%
   mutate(
-    head_female                  = coalesce(as.integer(head_female), 0L),
-    single_parent_relaxed        = coalesce(as.integer(single_parent_relaxed), 0L),
-    household_has_disability     = coalesce(as.integer(household_has_disability), 0L),
+    head_female              = coalesce(as.integer(head_female), 0L),
+    single_parent_relaxed    = coalesce(as.integer(single_parent_relaxed), 0L),
+    household_has_disability = coalesce(as.integer(household_has_disability), 0L),
     household_survivor_violence = coalesce(as.integer(household_survivor_violence), 0L),
+    
+    # ⚠️ Nuevo índice SIN discapacidad
     vulnerability_score = head_female +
                           single_parent_relaxed +
-                          household_has_disability +
                           household_survivor_violence
   )
 
@@ -2614,7 +2615,6 @@ Ahora vamos a hacer la misma gráfica pero intentando presentar como se comporta
 vars_vulnerabilidad <- c(
   "head_female", 
   "single_parent_relaxed", 
-  "household_has_disability", 
   "household_survivor_violence"
 )
 
@@ -2648,13 +2648,12 @@ df_largo <- cartagena %>%
       "Sin Vulnerabilidad" = "sin_vulnerabilidad",
       "Jefatura Femenina" = "head_female",
       "Monoparental" = "single_parent_relaxed",
-      "Con Discapacidad" = "household_has_disability",
       "Víctima de Violencia" = "household_survivor_violence"
     ),
     # Reordenamos los niveles para que "Sin Vulnerabilidad" aparezca primero.
   grupo_vulnerabilidad = fct_relevel(
   grupo_vulnerabilidad, 
-  "Sin Vulnerabilidad", "Jefatura Femenina", "Monoparental", "Con Discapacidad", "Víctima de Violencia"
+  "Sin Vulnerabilidad", "Jefatura Femenina", "Monoparental", "Víctima de Violencia"
 )
   )
 
@@ -2739,19 +2738,13 @@ ggsave(
 ```
 
 # PARTE 4:Evidencia empírica y estimación
-1. Describa el diseño del contraste estadísJco
-1. Seleccione la prueba de acuerdo con la situación (por ejemplo, prueba t de
+
+### 1. Seleccione la prueba de acuerdo con la situación (por ejemplo, prueba t de
 diferencia de medias, prueba de proporciones, etc.)
-2. Explique brevemente qué se está comparando y cuál sería la expectaJva teórica o
-empírica según el hecho esJlizado que se desea comprobar.
-3. Señale si el contraste es bilateral o unilateral y cuál sería la dirección esperada del
-efecto. Esto en línea con lo encontrado en el EDA
-2. Revise los supuestos y ejecute la prueba
-1. Verifique las condiciones necesarias para aplicar la prueba elegida (normalidad,
-independencia, homogeneidad de varianzas, tamaño de muestra). En caso de que
-alguna condición no se cumpla, jusJfique la prueba alternaJva empleada o las
-transformaciones realizadas sobre los datos.
-2. Ejecute la prueba y reporte los resultados relevantes: estadísJco de prueba, el
+
+
+### 2. Ejecute la prueba y reporte los resultados relevantes: estadísJco de prueba, el
 intervalo de confianza esJmado.
-3. Reporte el p-valor de la prueba de hipótesis y explique qué significa en términos del
+
+### 3. Reporte el p-valor de la prueba de hipótesis y explique qué significa en términos del
 riesgo de error Jpo I.
