@@ -342,7 +342,7 @@ cartagena_pre <- data_hogares %>%
 Considerando la pregunta de investigación planteada, en esta sección se presentan los **análisis univariados** que permiten explorar con mayor detalle las variables centrales del estudio:
 
 -   **Variable dependiente (Y):** *Carencia de acceso a servicios públicos*, que sintetiza las condiciones de vivienda en términos de energía electríca, gas, agua, acueducto y alcantarillado, y disposición de residuos.\
--   **Variable independiente (X):** *Score de vulnerabilidad*, construido a partir de cuatro condiciones clave de vulnerabilidad que se describirán por separado para facilitar su comprensión (jefatura femenida, hogar monoparental, antecedentes de violencia)
+-   **Variable independiente (X):** *Score de vulnerabilidad*, construido a partir de tres condiciones clave de vulnerabilidad que se describirán por separado para facilitar su comprensión (jefatura femenina, hogar monoparental, antecedentes de violencia)
 
 El objetivo de este apartado es caracterizar de manera individual estas variables, identificando su distribución y principales patrones, como paso previo al análisis bivariado que permitirá evaluar la relación entre ellas.
 
@@ -362,16 +362,15 @@ cartagena_pre <- cartagena_pre %>%
 
 ### c) Creación de variables independientes
 
-Para intentar análizar de forma diferencial las diferencias en las carencias de acceso a servicios públicos (variable dependiente), se construyó un **índice de vulnerabilidad** a nivel de hogar que sintetiza cuatro condiciones estructurales asociadas a un mayor riesgo social. Estas condiciones, consideradas de manera individual y en conjunto, permiten caracterizar la situación de vulnerabilidad de los hogares migrantes en Cartagena de Indias. Las variables consideradas son:
+Para intentar análizar de forma diferencial las diferencias en las carencias de acceso a servicios públicos (variable dependiente), se construyó un **índice de vulnerabilidad** a nivel de hogar que sintetiza tres condiciones estructurales asociadas a un mayor riesgo social. Estas condiciones, consideradas de manera individual y en conjunto, permiten caracterizar la situación de vulnerabilidad de los hogares migrantes en Cartagena de Indias. Las variables consideradas son:
 
 1.  **Jefatura femenina del hogar**: identifica si la persona cabeza de hogar es mujer.\
 2.  **Hogar monoparental**: determina si el hogar está conformado por un padre o madre sin cónyuge y con hijos, o si incluye un “Papá/Mamá” con estado civil soltero, separado, divorciado o viudo.\
-3.  **Presencia de personas con discapacidad**: señala si al menos un miembro del hogar reporta alguna limitación o barrera física.\
-4.  **Antecedentes de violencia o amenazas**: registra si algún miembro del hogar ha sido víctima de violencia o amenazas.
+3.  **Antecedentes de violencia o amenazas**: registra si algún miembro del hogar ha sido víctima de violencia o amenazas.
 
-A partir de estas cuatro dimensiones se calculó la variable de interés principal, el **índice de vulnerabilidad**, definido como un **puntaje aditivo de 0 a 4** que suma un punto por cada condición cumplida. Este índice ofrece una medida sintética de la vulnerabilidad de los hogares y servirá como **variable independiente (X)** en los análisis posteriores.
+A partir de estas cuatro dimensiones se calculó la variable de interés principal, el **índice de vulnerabilidad**, definido como un **puntaje aditivo de 0 a 3** que suma un punto por cada condición cumplida. Este índice ofrece una medida sintética de la vulnerabilidad de los hogares y servirá como **variable independiente (X)** en los análisis posteriores.
 
-En los siguientes apartados se describe, paso a paso, el procedimiento para identificar cada una de las cuatro condiciones de vulnerabilidad, con sus respectivos resúmenes para Cartagena, el resto del país y el total nacional, antes de integrar la información en el índice final.
+En los siguientes apartados se describe, paso a paso, el procedimiento para identificar cada una de las tres condiciones de vulnerabilidad, con sus respectivos resúmenes para Cartagena, el resto del país y el total nacional, antes de integrar la información en el índice final.
 
 1) Jefatura femenina del hogar
 
@@ -499,7 +498,7 @@ save_kable(tabla2, "results/tabla2.html")
 
 ```
 
-3) Personas con discapacidad
+3) Personas con discapacidad (esta no se agrega al índice porque solo hay un hogar que tiene persona condiscapacidad)
 
 ```{r}
 # 1) Identificando personas con discapacidad
