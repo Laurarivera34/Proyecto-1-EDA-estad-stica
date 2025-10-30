@@ -1,5 +1,5 @@
 ---
-  title: "Proyecto1 : Explorando datos sobre migrantes venezolanos en Colombia"
+title: "Proyecto1 : Explorando datos sobre migrantes venezolanos en Colombia"
 subtitle: "Facultad de Economía, Universidad de los Andes"
 author: "Camila Caraballo, Laura Rivera y Javier Amaya Nieto"
 date: "2025-10-31"
@@ -2739,12 +2739,218 @@ ggsave(
 
 # PARTE 4:Evidencia empírica y estimación
 
-### 1. Seleccione la prueba de acuerdo con la situación (por ejemplo, prueba t de
-diferencia de medias, prueba de proporciones, etc.)
+Evaluación de los supuestos y la presencia de ties
+
+```{r, echo=FALSE}
+# Instalar si es necesario
+#install.packages(c("wCorr", "survey")) 
+
+# Cargar las librerías
+library(dplyr)
+library(wCorr)
+library(survey)
+library(knitr) 
+library(readr) 
+library(fs)    
+```
+
+```{r}
+# B. CÁLCULO DE FRECUENCIAS PONDERADAS Y EXPORTACIÓN - INDICE DE VULNERABILIDAD (X)
+
+# 1. Calcular frecuencias ponderadas para vulnerability_score (X)
+freq_vulnerabilidad_pond <- cartagena %>%
+  group_by(vulnerability_score) %>%
+  summarise(
+    Frecuencia_Ponderada = sum(f_exp_hog)
+  ) %>%
+  ungroup() %>%
+  # Añadir la columna de Proporción Ponderada (%)
+  mutate(Proporcion_Ponderada = Frecuencia_Ponderada / sum(Frecuencia_Ponderada) * 100) %>%
+  rename(`Índice de Vulnerabilidad` = vulnerability_score)
+
+# 2. Determinar la Proporción máxima de empates PONDERADOS
+max_prop_v_pond <- max(freq_vulnerabilidad_pond$Proporcion_Ponderada) / 100
+
+# 3. Generar la tabla con el formato kableExtra
+tabla_vulnerabilidad <- freq_vulnerabilidad_pond %>%
+  kable(
+    "html",
+    caption = "<b style='color:#003366; font-size:16px;'>Frecuencia Ponderada: Índice de Vulnerabilidad</b>",
+    digits = 2 
+  ) %>%
+  kable_styling(
+    full_width = FALSE,
+    bootstrap_options = c("striped", "hover", "condensed"),
+    position = "center"
+  ) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#003366") 
+
+# 4. Exportar la tabla
+file_vulnerabilidad <- "results/tabla_vulnerabilidad_ponderada.html"
+save_kable(tabla_vulnerabilidad, file_vulnerabilidad)
+
+# B. CÁLCULO DE FRECUENCIAS PONDERADAS Y EXPORTACIÓN - NÚMERO DE CARENCIA (Y)
+
+# 1. Calcular frecuencias ponderadas para servicios (Y)
+freq_carencias_pond <- cartagena %>%
+  group_by(servicios) %>%
+  summarise(
+    Frecuencia_Ponderada = sum(f_exp_hog)
+  ) %>%
+  ungroup() %>%
+  # Añadir la columna de Proporción Ponderada (%)
+  mutate(Proporcion_Ponderada = Frecuencia_Ponderada / sum(Frecuencia_Ponderada) * 100) %>%
+  rename(`Número de Carencias` = servicios)
+
+# 2. Determinar la Proporción máxima de empates PONDERADOS
+max_prop_c_pond <- max(freq_carencias_pond$Proporcion_Ponderada) / 100
+
+# 3. Generar la tabla con el formato kableExtra
+tabla_carencias <- freq_carencias_pond %>%
+  kable(
+    "html",
+    caption = "<b style='color:#003366; font-size:16px;'>Frecuencia Ponderada: Número de Carencias (Servicios)</b>",
+    digits = 2 
+  ) %>%
+  kable_styling(
+    full_width = FALSE,
+    bootstrap_options = c("striped", "hover", "condensed"),
+    position = "center"
+  ) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#003366") 
+
+# 4. Exportar la tabla
+file_carencias <- file.path(output_dir, "tabla_carencias_ponderada.html")
+save_kable(tabla_carencias, file_carencias)
 
 
-### 2. Ejecute la prueba y reporte los resultados relevantes: estadísJco de prueba, el
-intervalo de confianza esJmado.
 
-### 3. Reporte el p-valor de la prueba de hipótesis y explique qué significa en términos del
-riesgo de error Jpo I.
+```
+
+```{r}
+# ------------------------------------------------------------------------
+# B. ESTRUCTURA DE LA RELACIÓN (SUPUESTO B)
+# ------------------------------------------------------------------------
+
+# 1. Matriz de Frecuencia Ponderada (Suma de Pesos Ponderados)
+matriz_frecuencia_ponderada <- xtabs(f_exp_hog ~ vulnerability_score + servicios, data = cartagena)
+
+# Convertir la matriz a data frame para kableExtra
+df_matriz <- as.data.frame.matrix(matriz_frecuencia_ponderada)
+df_matriz$vulnerability_score <- rownames(df_matriz)
+df_matriz <- df_matriz %>% relocate(vulnerability_score)
+
+# 2. Generar la tabla HTML
+tabla_matriz_frecuencia <- df_matriz %>%
+  kable(
+    "html",
+    caption = "<b style='color:#003366; font-size:16px;'>Matriz de Frecuencia Ponderada (vulnerability_score vs. servicios)</b>",
+    digits = 2, 
+    row.names = FALSE
+  ) %>%
+  kable_styling(
+    full_width = FALSE,
+    bootstrap_options = c("striped", "hover", "condensed"),
+    position = "center"
+  ) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#003366")
+
+# 3. Exportar la tabla
+file_matriz <- "results/tabla_matriz_frecuencia_ponderada.html"
+save_kable(tabla_matriz_frecuencia, file_matriz)
+
+```
+
+```{r}
+# ------------------------------------------------------------------------
+# C. CÁLCULO DE RHO DE SPEARMAN PONDERADO (SUPUESTOS A, C y D)
+# ------------------------------------------------------------------------
+
+cat("\n### C. Rho de Spearman Ponderado (Estadístico de Prueba) ###\n\n")
+
+# Usamos weightedCorr para obtener el coeficiente ajustado por los pesos
+resultado_spearman <- weightedCorr(
+  x = cartagena$vulnerability_score,
+  y = cartagena$servicios,
+  method = "Spearman",
+  weights = cartagena$f_exp_hog
+)
+
+cat(sprintf("Resultado del Rho de Spearman PONDERADO: %.4f\n", resultado_spearman))
+```
+```{r}
+# Paquetes ---------------------------------------------------------------
+if (!requireNamespace("wCorr", quietly = TRUE)) install.packages("wCorr")
+library(wCorr)
+
+# --- ENTRADAS -----------------------------------------------------------
+x <- cartagena$vulnerability_score
+y <- cartagena$servicios
+w <- cartagena$f_exp_hog
+
+# Limpieza ---------------------------------------------------------------
+keep <- is.finite(x) & is.finite(y) & is.finite(w) & w > 0
+x <- x[keep]; y <- y[keep]; w <- w[keep]
+w_prob <- w / sum(w)
+n <- length(x)
+
+# 1) Rho de Spearman ponderado (observado) -------------------------------
+rho_obs <- wCorr::weightedCorr(x, y, method = "Spearman", weights = w)
+
+# 2) IC 95% unilateral inferior (bootstrap ponderado) --------------------
+boot_weighted_spearman <- function(x, y, w, w_prob, R = 2000, seed = 123){
+  if(!is.null(seed)) set.seed(seed)
+  n <- length(x)
+  boots <- replicate(R, {
+    idx <- sample.int(n, replace = TRUE, prob = w_prob)
+    wCorr::weightedCorr(x[idx], y[idx], method = "Spearman", weights = w[idx])
+  })
+  # Unilateral inferior al 95%: [q0.05, 1]
+  ci_lower <- as.numeric(stats::quantile(boots, 0.05, na.rm = TRUE))
+  list(boots = boots, ci_lower = ci_lower)
+}
+boot_res <- boot_weighted_spearman(x, y, w, w_prob, R = 2000, seed = 123)
+ci95_lower_boot <- boot_res$ci_lower
+
+# 3) p-valor unilateral (permutación a la derecha: H0: ρ ≤ 0, H1: ρ > 0) --
+perm_pvalue_right <- function(x, y, w, R = 10000, seed = 456){
+  if(!is.null(seed)) set.seed(seed)
+  obs <- wCorr::weightedCorr(x, y, method = "Spearman", weights = w)
+  perms <- replicate(R, {
+    y_perm <- sample(y, replace = FALSE)
+    wCorr::weightedCorr(x, y_perm, method = "Spearman", weights = w)
+  })
+  # Proporción de permutaciones >= observado (cola derecha, corrección +1)
+  p_right <- (sum(perms >= obs) + 1) / (R + 1)
+  list(p_right = p_right, obs = obs)  # perms opcional si quieres inspeccionarlos
+}
+perm_res <- perm_pvalue_right(x, y, w, R = 10000, seed = 456)
+p_perm_right <- perm_res$p_right
+
+# 4) (Opcional) Aproximación analítica unilateral con n_eff --------------
+#    Var(z_spearman) ≈ 1.06/(n_eff - 3)  (Bonett & Wright, 2000)
+n_eff <- (sum(w)^2) / sum(w^2)
+z_s  <- 0.5 * log((1 + rho_obs) / (1 - rho_obs))
+se_z <- sqrt(1.06 / pmax(n_eff - 3, 1.0001))
+zstat <- z_s / se_z
+p_norm_right <- 1 - pnorm(zstat)                        # cola derecha
+z_lower <- z_s - qnorm(0.95) * se_z                     # límite inferior 95%
+ci95_lower_ana <- tanh(z_lower)                         # volver a rho
+
+# Salida -----------------------------------------------------------------
+cat("\n### C. Rho de Spearman Ponderado (Hipótesis unilateral: ρ > 0) ###\n\n")
+cat(sprintf("Rho ponderado (observado): %.4f\n", rho_obs))
+cat(sprintf("IC 95%% unilateral inferior (bootstrap): [%.4f, 1]\n", ci95_lower_boot))
+cat(sprintf("p-valor (permutación, cola derecha): %.5f\n", p_perm_right))
+
+cat("\n-- Aproximación analítica (referencia rápida) --\n")
+cat(sprintf("n_eff = %.1f\n", n_eff))
+cat(sprintf("Límite inferior 95%% analítico: [%.4f, 1]\n", ci95_lower_ana))
+cat(sprintf("p-valor analítico (cola derecha): %.5f\n", p_norm_right))
+
+
+```
+
+
+
+
