@@ -47,11 +47,11 @@ pacman::p_load(
 
 ```
 
-# PARTE 0: Situación
+# Antecedentes
 
 Su grupo de trabajo hace parte de un equipo técnico que apoya a una alcaldía en un programa de mejora de la calidad de vida de hogares venezolanos. La alcaldía quiere mejorar la focalización de su respuesta en vivienda y servicios básicos, pero no sabe qué factores son los más importantes para idenficar condiciones de vida deficientes.
 
- a) Ajustes iniciales
+a)  Ajustes iniciales
 
 -   Designando rutas de trabajo y carga de datos: en este paso se puede revisar rapidamente la base de hogares y se carga la base de personas debido a que se usarán algunas variable de esta última para construir unas variables de la base de hogares que será el foco de nuestro trabajo.
 
@@ -62,7 +62,7 @@ hogares <- read_excel(xlsx_path, sheet = "Hogares") %>% clean_names()
 personas <- read_excel(xlsx_path, sheet = "Personas") %>% clean_names()
 ```
 
--   Estandarizar nombres (mayúsculas/acentos) en intro4 e intro5: en este paso ajustamos los nombres de departamento y municipio para mejorar la presentación de los datos de aquí en adelante. Y también se hace un proceso de estandarización usando clean:names() de janitor.
+-   Estandarizar nombres (mayúsculas/acentos): en este paso ajustamos los nombres de departamento y municipio para mejorar la presentación de los datos de aquí en adelante. Y también se hace un proceso de estandarización usando clean:names() de janitor.
 
 ```{r}
 # Cambiar nombres y estandarizar
@@ -88,7 +88,7 @@ data_hogares <- hogares %>%
 
 ```
 
-b) Selección de la ciudad
+b)  Selección de la ciudad
 
 Considerando los requisitos del taller y la pregunta de indagación consignada en la sección *Parte 1.a*, que propone comparar las carencias en el acceso a servicios públicos entre hogares migrantes según su nivel de vulnerabilidad, esta sección explica la lógica utilizada para seleccionar una ciudad específica.
 
@@ -118,7 +118,7 @@ data_hogares <- data_hogares %>%
   )
 ```
 
-Intención de migración
+**Intención de migración**
 
 Esta sección presenta, como eje central, los municipios con menor intención de movilidad, complementados con aquellos de mayor intención y las principales razones de desplazamiento, buscando asegurar la coherencia de los hallazgos.
 
@@ -232,7 +232,7 @@ ggsave("results/grafico2.png",
 
 ```
 
-En esta parte del análisis descriptivo llaman la atención varios municipios que, por su localización, pueden considerarse de **frontera o cercanos a zonas de tránsito migratorio** —como *Pasto, Arauca, Riohacha y Maicao*— los cuales presentan proporciones destacadas de hogares con intención de mudarse. Asimismo, aparecen **ciudades intermedias y grandes urbes** como *Bogotá, Soacha, Barranquilla, Medellín y Pereira*, que podrían funcionar como **destinos de llegada temporal** para migrantes venezolanos, en los que se establecen inicialmente con el fin de trabajar y reunir recursos que les permitan posteriormente desplazarse hacia un segundo destino. Estos hallazgos muestran consistencia con los resultados
+En esta parte del análisis descriptivo llaman la atención varios municipios que, por su localización, pueden considerarse de frontera o cercanos a zonas de tránsito migratorio —como *Pasto, Arauca, Riohacha y Maicao*— los cuales presentan proporciones destacadas de hogares con intención de mudarse. Asimismo, aparecen ciudades intermedias y grandes urbes como *Bogotá, Soacha, Barranquilla, Medellín y Pereira*, que podrían funcionar como destinos de llegada temporal para migrantes venezolanos, en los que se establecen inicialmente con el fin de trabajar y reunir recursos que les permitan posteriormente desplazarse hacia un segundo destino. Estos hallazgos muestran consistencia con los resultados
 
 Este patrón es consistente con las dinámicas migratorias documentadas en Colombia: los municipios de frontera suelen concentrar población migrante en tránsito, mientras que las grandes ciudades funcionan como polos de atracción por sus oportunidades laborales y por la existencia de redes de apoyo. La presencia simultánea de ambos tipos de municipios en los resultados refuerza la validez de este análisis inicial y aporta coherencia a la elección de **Cartagena de Indias** como ciudad foco para responder la pregunta planteada. Ahora vamos a presentar las razón principal por la cual los hogares quieren mudarse fuera de la ciudad donde residen actualmente y que proporciona una visión más completa de esta característica de intención de movilidad de los migrantes.
 
@@ -326,11 +326,13 @@ ggsave("results/grafico3.png",
 
 ```
 
-# PARTE 1: Planteamiento de la pregunta de indagación
+# 1. Planteamiento de la pregunta de indagación
 
-### a) Pregunta de indagación
+#### a) Pregunta de indagación
 
-Teniendo en cuenta los resultados presentados en la **PARTE 0\* Este trabajo busca responder la siguiente pregunta de investigación:\
+Teniendo en cuenta los resultados presentados en la PARTE 0\* Este trabajo busca responder la siguiente pregunta de investigación:
+
+**\
 **¿Existen diferencias en las carencias de acceso a servicios públicos entre hogares migrantes con distintos niveles de vulnerabilidad en Cartagena de Indias?\*\*
 
 ```{r}
@@ -339,14 +341,14 @@ cartagena_pre <- data_hogares %>%
   filter(mpio == "Cartagena De Indias") 
 ```
 
-Considerando la pregunta de investigación planteada, en esta sección se presentan los **análisis univariados** que permiten explorar con mayor detalle las variables centrales del estudio:
+Considerando la pregunta de investigación planteada, en esta sección se presentan los análisis univariados que permiten explorar con mayor detalle las variables centrales del estudio:
 
--   **Variable dependiente (Y):** *Carencia de acceso a servicios públicos*, que sintetiza las condiciones de vivienda en términos de energía electríca, gas, agua, acueducto y alcantarillado, y disposición de residuos.\
--   **Variable independiente (X):** *Score de vulnerabilidad*, construido a partir de tres condiciones clave de vulnerabilidad que se describirán por separado para facilitar su comprensión (jefatura femenina, hogar monoparental, antecedentes de violencia)
+-   Variable dependiente (Y): *Carencia de acceso a servicios públicos*, que sintetiza las condiciones de vivienda en términos de energía electríca, gas, agua, acueducto y alcantarillado, y disposición de residuos.\
+-   Variable independiente (X): *Score de vulnerabilidad*, construido a partir de tres condiciones clave de vulnerabilidad que se describirán por separado para facilitar su comprensión (jefatura femenina, hogar monoparental, antecedentes de violencia)
 
 El objetivo de este apartado es caracterizar de manera individual estas variables, identificando su distribución y principales patrones, como paso previo al análisis bivariado que permitirá evaluar la relación entre ellas.
 
-### b) Creación de variable dependiente
+#### b) Creación de variable dependiente
 
 Se construye la variable *servicios* que mide la cantidad de servicios básicos de los que carece la vivienda y se construye a partir de las variables (electricidad, gas, alcantallirado, acueducto y recolección de basuras). Por cada servicio que hace falta en el hogar se cuenta como 1 y si carece de todos entonces cuenta como 5
 
@@ -360,7 +362,7 @@ cartagena_pre <- cartagena_pre %>%
            alojamiento4_alojamiento4_recoleccion)
 ```
 
-### c) Creación de variables independientes
+#### c) Creación de variables independientes
 
 Para intentar análizar de forma diferencial las diferencias en las carencias de acceso a servicios públicos (variable dependiente), se construyó un **índice de vulnerabilidad** a nivel de hogar que sintetiza tres condiciones estructurales asociadas a un mayor riesgo social. Estas condiciones, consideradas de manera individual y en conjunto, permiten caracterizar la situación de vulnerabilidad de los hogares migrantes en Cartagena de Indias. Las variables consideradas son:
 
@@ -368,11 +370,11 @@ Para intentar análizar de forma diferencial las diferencias en las carencias de
 2.  **Hogar monoparental**: determina si el hogar está conformado por un padre o madre sin cónyuge y con hijos, o si incluye un “Papá/Mamá” con estado civil soltero, separado, divorciado o viudo.\
 3.  **Antecedentes de violencia o amenazas**: registra si algún miembro del hogar ha sido víctima de violencia o amenazas.
 
-A partir de estas cuatro dimensiones se calculó la variable de interés principal, el **índice de vulnerabilidad**, definido como un **puntaje aditivo de 0 a 3** que suma un punto por cada condición cumplida. Este índice ofrece una medida sintética de la vulnerabilidad de los hogares y servirá como **variable independiente (X)** en los análisis posteriores.
+A partir de estas cuatro dimensiones se calculó la variable de interés principal, el índice de vulnerabilidad, definido como un puntaje aditivo de 0 a 3 que suma un punto por cada condición cumplida. Este índice ofrece una medida sintética de la vulnerabilidad de los hogares y servirá como variable independiente (X) en los análisis posteriores.
 
 En los siguientes apartados se describe, paso a paso, el procedimiento para identificar cada una de las tres condiciones de vulnerabilidad, con sus respectivos resúmenes para Cartagena, el resto del país y el total nacional, antes de integrar la información en el índice final.
 
-1) Jefatura femenina del hogar
+1)  **Jefatura femenina del hogar**
 
 ```{r}
 # 1. Preparar variable de sexo del jefe
@@ -427,7 +429,7 @@ save_kable(tabla1, "results/tabla1.html")
 
 ```
 
-2) Hogar monoparental
+2)  **Hogar monoparental**
 
 ```{r}
 # 1. Estados civiles 
@@ -498,7 +500,7 @@ save_kable(tabla2, "results/tabla2.html")
 
 ```
 
-3) Personas con discapacidad (esta no se agrega al índice porque solo hay un hogar que tiene persona condiscapacidad)
+3)  **Personas con discapacidad** (esta no se agrega al índice porque solo hay un hogar que tiene persona con discapacidad)
 
 ```{r}
 # 1) Identificando personas con discapacidad
@@ -565,7 +567,8 @@ save_kable(tabla3, "results/tabla3.html")
 
 ```
 
-4) Antecedentes de violencia o amenazas
+4)  **Antecedentes de violencia o amenazas**
+
 ```{r}
 # 1) Identificando hogares con violencia para alguno de sus miembros
 hogares_violencia_amenazas <- data_hogares %>%
@@ -615,10 +618,9 @@ tabla4 <- resumen_violencia_amenazas %>%
 save_kable(tabla4, "results/tabla4.html")
 ```
 
+5)  **Índice de vulnerabilidad**
 
-5) Índice de vulnerabilidad
-
-Finalmente, el índice de vulnerabilidad es un puntaje aditivo (0–4) que suma cuatro puntos: (1) jefatura del hogar femenina; (2) hogar mono-parental, definido como jefe/a sin cónyuge y con hijos, o presencia de “Papá/Mamá” con estado civil soltero/separado/divorciado/viudo; (3) al menos una persona con discapacidad en el hogar; y (4) antecedente de violencia contra miembros del hogar (proteccion1006_v_ctima_de_violencia_amenazas). El código incluye una comparación de Cartagéna y el país.
+Finalmente, el índice de vulnerabilidad es un puntaje aditivo (0–3) que suma tres puntos: (1) jefatura del hogar femenina; (2) hogar mono-parental, definido como jefe/a sin cónyuge y con hijos, o presencia de “Papá/Mamá” con estado civil soltero/separado/divorciado/viudo; (3) antecedente de violencia contra miembros del hogar (proteccion1006_v_ctima_de_violencia_amenazas). El código incluye una comparación de Cartagéna y el país.
 
 ```{r}
 # 1) Construcción del score de vulnerabilidad (sin discapacidad)
@@ -633,7 +635,7 @@ hogares_vulnerabilidad <- hogares_out %>%
     household_has_disability = coalesce(as.integer(household_has_disability), 0L),
     household_survivor_violence = coalesce(as.integer(household_survivor_violence), 0L),
     
-    # ⚠️ Nuevo índice SIN discapacidad
+    # Nuevo índice SIN discapacidad
     vulnerability_score = head_female +
                           single_parent_relaxed +
                           household_survivor_violence
@@ -696,8 +698,7 @@ save_kable(tabla6, "results/tabla6.html")
 
 ```
 
-
-### d) Integración de variables en una base
+#### d) Integración de variables en una base
 
 Ahora vamos a integrar las variables necesarias para los análisis de las siguientes secciones:
 
@@ -735,11 +736,11 @@ cartagena <- left_join(cartagena_dep, cartagena_ind, by = "id_hogar")
 
 ```
 
-# PARTE 2: Análisis univariado
+#### e) Análisis univariado
 
 Antes de cruzar variables, se debe entender cada variable por sí sola: su codificación, distribución, faltantes y posibles errores. Esto asegura que las comparaciones bivariadas no estén sesgadas pordatos mal definidos. ¿Qué abordar para cada variable? Tipo y codificación: ¿numérica, categórica (nominal/ordinal),fecha, texto? ¿Binarias están en 0/1?
 
-### a) Variable dependiente: Servicios
+**Variable dependiente: Servicios**
 
 ```{r}
 
@@ -833,6 +834,7 @@ writeLines(notas_metodo, "results/notas_metodo_servicios.txt")
 ```
 
 Se aplicó el factor de expansión de hogares (F_EXP_hog) para calcular la distribución, con el fin de garantizar que los resultados reflejen la distribución poblacional y no solo la muestra encuestada. Esto significa que cada observación representa un número mayor de hogares en la población, y los totales se obtienen sumando los pesos en lugar de contar registros.
+
 ```{r}
 
 # 1. Estructura de la variable
@@ -976,13 +978,9 @@ print(grafico6_ic)
 
 ```
 
+**Variables independientes**
 
-
-
-
-### b) Variables independientes
-
-####1) Jefatura femenina del hogar
+-   Jefatura femenina del hogar
 
 La variable head_female es una variable binaria, donde 1 corresponde a jefatura femenina y 0 a jefatura masculina, sin valores faltantes ni atípicos.
 
@@ -1217,7 +1215,7 @@ print(grafico_fem_ic)
 
 ```
 
-####2) Hogar monoparental:
+-   Hogar monoparental:
 
 De la variable single_parent_relaxed creada anteriormente, se puede decir que no se identificaron valores faltantes en la variable y los únicos valores posibles fueron 0 y 1. Ahora bien a continuación se evidencia que esta variable sin ponderar representa un 26,6 % de los hogares están conformados por un solo adulto responsable de hijos, mientras que el 73,4 % restante cuenta con dos o más adultos.
 
@@ -1311,6 +1309,7 @@ writeLines(notas_metodo_singleparent, "results/notas_metodo_singleparent.txt")
 
 
 ```
+
 Ahora con factor expansión
 
 ```{r}
@@ -1455,8 +1454,7 @@ print(grafico_single_ic)
 
 ```
 
-
-####3) Personas con discapacidad
+-   Personas con discapacidad
 
 ```{r}
 # 1. Tabla resumen
@@ -1547,6 +1545,7 @@ writeLines(notas_metodo_disability, "results/notas_metodo_disability.txt")
 ```
 
 Con factor expansión
+
 ```{r}
 # 1. Estructura de la variable
 estructura <- data.frame(estructura = capture.output(str(cartagena$household_has_disability)))
@@ -1688,10 +1687,10 @@ print(grafico_disc_ic)
 
 ```
 
+-   Antecedentes de violencia o amenazas:
 
-####4) Antecedentes de violencia o amenazas:
+La variable *household_survivor_violence* indica si el hogar sufrió violencia.
 
-La variable *household_survivor_violence* indica si el hogar sufrió violencia. 
 ```{r}
 # 1. Tabla resumen
 resumen_violence <- data.frame(
@@ -1781,6 +1780,7 @@ writeLines(notas_metodo_violence, "results/notas_metodo_violence.txt")
 ```
 
 Ahora con factor expansión
+
 ```{r}
 
 # 1. Estructura de la variable
@@ -1923,11 +1923,9 @@ print(grafico_viol_ic)
 
 ```
 
+#### f) Índice de vulnerabilidad
 
-
-#### 5) Índice de vulnerabilidad
-
-Explorando en detalle el índice de vulnerabilidad, definida como una variable categórica de 0 a 4, la cual indica la cantidad de vulnerabilidades con las que cuentan los hogares. 
+Explorando en detalle el índice de vulnerabilidad, definida como una variable categórica de 0 a 3, la cual indica la cantidad de vulnerabilidades con las que cuentan los hogares.
 
 ```{r}
 
@@ -2026,6 +2024,7 @@ writeLines(notas_metodo_vul, "results/notas_metodo_vul.txt")
 ```
 
 Ahora con factor de expansión:
+
 ```{r}
 
 # --- 1. Estructura de la variable ---
@@ -2204,11 +2203,9 @@ ggsave("results/grafico14.png", plot = grafico_ic_vulniv, width = 10, height = 6
 
 ```
 
+#### g) Visualizaciones exploratorias
 
-
-# PARTE 3: Visualizaciones de exploración según la pregunta de indagación
-
-Empezamos tratando las variable Y como continua y la variable X como categórica para la expliración inicial.
+Empezamos tratando las variable Y como continua y la variable X como categórica para la exploración inicial.
 
 ```{r}
 
@@ -2240,7 +2237,7 @@ print(grafico_pond2)
 
 ```
 
-Es posible que esta estrategia no sea tan adecuada porque es posible que la distribución de la variable de carencia de servicios no siga una distribución normal y esto afecte negativamente la visualización de los datos. De esta manera, se considera quye una opción puede ser revisar la proporción de hogares con carencia de 2 o más servicios (dicotomizar la variable de carencia de servicios) y visualizar esta variable para cada una de las condiciones de vulnerabilidad. Este análisis tiene relevancia ya que es posible que las diferentes condiciones evaluadas no tengan la misma ponderación al analizar la variable latente "vulnerabilidad".
+Es posible que esta estrategia no sea tan adecuada porque es posible que la distribución de la variable de carencia de servicios no siga una distribución normal y esto afecte negativamente la visualización de los datos. De esta manera, se considera que una opción puede ser revisar la proporción de hogares con carencia de 2 o más servicios (dicotomizar la variable de carencia de servicios) y visualizar esta variable para cada una de las condiciones de vulnerabilidad. Este análisis tiene relevancia ya que es posible que las diferentes condiciones evaluadas no tengan la misma ponderación al analizar la variable latente "vulnerabilidad".
 
 ```{r}
 # Objeto de diseño de encuesta
@@ -2737,7 +2734,7 @@ ggsave(
 )
 ```
 
-# PARTE 4:Evidencia empírica y estimación
+# 2. Evidencia empírica y estimación
 
 Evaluación de los supuestos y la presencia de ties
 
@@ -2755,7 +2752,7 @@ library(fs)
 ```
 
 ```{r}
-# B. CÁLCULO DE FRECUENCIAS PONDERADAS Y EXPORTACIÓN - INDICE DE VULNERABILIDAD (X)
+# CÁLCULO DE FRECUENCIAS PONDERADAS Y EXPORTACIÓN - INDICE DE VULNERABILIDAD (X)
 
 # 1. Calcular frecuencias ponderadas para vulnerability_score (X)
 freq_vulnerabilidad_pond <- cartagena %>%
@@ -2789,7 +2786,7 @@ tabla_vulnerabilidad <- freq_vulnerabilidad_pond %>%
 file_vulnerabilidad <- "results/tabla_vulnerabilidad_ponderada.html"
 save_kable(tabla_vulnerabilidad, file_vulnerabilidad)
 
-# B. CÁLCULO DE FRECUENCIAS PONDERADAS Y EXPORTACIÓN - NÚMERO DE CARENCIA (Y)
+# CÁLCULO DE FRECUENCIAS PONDERADAS Y EXPORTACIÓN - NÚMERO DE CARENCIA (Y)
 
 # 1. Calcular frecuencias ponderadas para servicios (Y)
 freq_carencias_pond <- cartagena %>%
@@ -2829,7 +2826,7 @@ save_kable(tabla_carencias, file_carencias)
 
 ```{r}
 # ------------------------------------------------------------------------
-# B. ESTRUCTURA DE LA RELACIÓN (SUPUESTO B)
+# ESTRUCTURA DE LA RELACIÓN (SUPUESTO B)
 # ------------------------------------------------------------------------
 
 # 1. Matriz de Frecuencia Ponderada (Suma de Pesos Ponderados)
@@ -2863,7 +2860,7 @@ save_kable(tabla_matriz_frecuencia, file_matriz)
 
 ```{r}
 # ------------------------------------------------------------------------
-# C. CÁLCULO DE RHO DE SPEARMAN PONDERADO (SUPUESTOS A, C y D)
+# CÁLCULO DE RHO DE SPEARMAN PONDERADO (SUPUESTOS A, C y D)
 # ------------------------------------------------------------------------
 
 cat("\n### C. Rho de Spearman Ponderado (Estadístico de Prueba) ###\n\n")
@@ -2878,6 +2875,7 @@ resultado_spearman <- weightedCorr(
 
 cat(sprintf("Resultado del Rho de Spearman PONDERADO: %.4f\n", resultado_spearman))
 ```
+
 ```{r}
 # Paquetes ---------------------------------------------------------------
 if (!requireNamespace("wCorr", quietly = TRUE)) install.packages("wCorr")
@@ -2951,6 +2949,8 @@ cat(sprintf("p-valor analítico (cola derecha): %.5f\n", p_norm_right))
 
 ```
 
+# 3. Interpretación y comunicación de los resultados
 
+```{r}
 
-
+```
