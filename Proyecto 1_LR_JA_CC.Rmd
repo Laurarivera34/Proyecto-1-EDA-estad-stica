@@ -40,11 +40,17 @@ pacman::p_load(
   haven,        # Lectura y escritura de formatos de Stata, SAS y SPSS.
   readxl,       # Lectura de archivos de Excel (.xls y .xlsx).
   stargazer,    # Creación de tablas de regresión con formato de publicación.
-  knitr         # Generación de reportes dinámicos.
+  knitr,         # Generación de reportes dinámicos.
+  forcats,
+  dplyr,
+  wCorr,
+  knitr,
+  readr,
+  fs,
+  stringr,
+  scales
+  
 )
-
-
-
 ```
 
 # Antecedentes
@@ -2614,7 +2620,6 @@ ggsave(
 Ahora vamos a hacer la misma gráfica pero intentando presentar como se comporta la carencia de servicios para cada una de las condiciones consideradas como de vulnerabilidad:
 
 ```{r}
-# --------------------------------
 # AJUSTANDO LOS DATOS PARA HACER LA GRÁFICA QUE QUEREMOS
 
 # Definimos las variables de vulnerabilidad que vamos a analizar.
@@ -2663,7 +2668,7 @@ df_largo <- cartagena %>%
 )
   )
 
-# --------------------------------
+
 # PREPARANDO EL DF PARA EL GRÁFICO
 
 # Creamos el objeto de diseño muestral con los datos ya transformados.
@@ -2684,7 +2689,6 @@ datos_grafico <- as.data.frame(svytable(~ servicios + grupo_vulnerabilidad, desi
   )
 
 
-# --------------------------------
 # HACIENDO EL GRÁFICO
 
 g_stack_final <- ggplot(datos_grafico, aes(x = grupo_vulnerabilidad, y = proporcion, fill = servicios)) +
@@ -2731,7 +2735,6 @@ g_stack_final <- ggplot(datos_grafico, aes(x = grupo_vulnerabilidad, y = proporc
 
 print(g_stack_final)
 
-# --------------------------------
 # EXPORTANDO EL GRÁFICO
 ggsave(
   filename = "results/grafico16.png",
@@ -2752,12 +2755,12 @@ Evaluación de los supuestos y la presencia de ties
 #install.packages(c("wCorr", "survey")) 
 
 # Cargar las librerías
-library(dplyr)
-library(wCorr)
-library(survey)
-library(knitr) 
-library(readr) 
-library(fs)    
+#ibrary(dplyr)
+#library(wCorr)
+#library(survey)
+#library(knitr) 
+#library(readr) 
+#library(fs)    
 ```
 
 ```{r}
@@ -2826,17 +2829,14 @@ tabla_carencias <- freq_carencias_pond %>%
   row_spec(0, bold = TRUE, color = "white", background = "#003366") 
 
 # 4. Exportar la tabla
+output_dir <- "results"
 file_carencias <- file.path(output_dir, "tabla_carencias_ponderada.html")
 save_kable(tabla_carencias, file_carencias)
-
-
 
 ```
 
 ```{r}
-# ------------------------------------------------------------------------
 # ESTRUCTURA DE LA RELACIÓN (SUPUESTO B)
-# ------------------------------------------------------------------------
 
 # 1. Matriz de Frecuencia Ponderada (Suma de Pesos Ponderados)
 matriz_frecuencia_ponderada <- xtabs(f_exp_hog ~ vulnerability_score + servicios, data = cartagena)
@@ -2846,7 +2846,7 @@ df_matriz <- as.data.frame.matrix(matriz_frecuencia_ponderada)
 df_matriz$vulnerability_score <- rownames(df_matriz)
 df_matriz <- df_matriz %>% relocate(vulnerability_score)
 
-# 2. Generar la tabla HTML
+# 2. Generar 
 tabla_matriz_frecuencia <- df_matriz %>%
   kable(
     "html",
@@ -2868,10 +2868,7 @@ save_kable(tabla_matriz_frecuencia, file_matriz)
 ```
 
 ```{r}
-# ------------------------------------------------------------------------
 # CÁLCULO DE RHO DE SPEARMAN PONDERADO (SUPUESTOS A, C y D)
-# ------------------------------------------------------------------------
-
 cat("\n### C. Rho de Spearman Ponderado (Estadístico de Prueba) ###\n\n")
 
 # Usamos weightedCorr para obtener el coeficiente ajustado por los pesos
@@ -2886,25 +2883,25 @@ cat(sprintf("Resultado del Rho de Spearman PONDERADO: %.4f\n", resultado_spearma
 ```
 
 ```{r}
-# Paquetes ---------------------------------------------------------------
-if (!requireNamespace("wCorr", quietly = TRUE)) install.packages("wCorr")
-library(wCorr)
+# Paquetes 
+#if (!requireNamespace("wCorr", quietly = TRUE)) install.packages("wCorr")
+#library(wCorr)
 
-# --- ENTRADAS -----------------------------------------------------------
+# ENTRADAS 
 x <- cartagena$vulnerability_score
 y <- cartagena$servicios
 w <- cartagena$f_exp_hog
 
-# Limpieza ---------------------------------------------------------------
+# Limpieza 
 keep <- is.finite(x) & is.finite(y) & is.finite(w) & w > 0
 x <- x[keep]; y <- y[keep]; w <- w[keep]
 w_prob <- w / sum(w)
 n <- length(x)
 
-# 1) Rho de Spearman ponderado (observado) -------------------------------
+# 1) Rho de Spearman ponderado (observado) 
 rho_obs <- wCorr::weightedCorr(x, y, method = "Spearman", weights = w)
 
-# 2) IC 95% unilateral inferior (bootstrap ponderado) --------------------
+# 2) IC 95% unilateral inferior (bootstrap ponderado) 
 boot_weighted_spearman <- function(x, y, w, w_prob, R = 2000, seed = 123){
   if(!is.null(seed)) set.seed(seed)
   n <- length(x)
@@ -2934,7 +2931,7 @@ perm_pvalue_right <- function(x, y, w, R = 10000, seed = 456){
 perm_res <- perm_pvalue_right(x, y, w, R = 10000, seed = 456)
 p_perm_right <- perm_res$p_right
 
-# 4) (Opcional) Aproximación analítica unilateral con n_eff --------------
+# 4) (Opcional) Aproximación analítica unilateral con n_eff
 #    Var(z_spearman) ≈ 1.06/(n_eff - 3)  (Bonett & Wright, 2000)
 n_eff <- (sum(w)^2) / sum(w^2)
 z_s  <- 0.5 * log((1 + rho_obs) / (1 - rho_obs))
@@ -2944,7 +2941,7 @@ p_norm_right <- 1 - pnorm(zstat)                        # cola derecha
 z_lower <- z_s - qnorm(0.95) * se_z                     # límite inferior 95%
 ci95_lower_ana <- tanh(z_lower)                         # volver a rho
 
-# Salida -----------------------------------------------------------------
+# Salida 
 cat("\n### C. Rho de Spearman Ponderado (Hipótesis unilateral: ρ > 0) ###\n\n")
 cat(sprintf("Rho ponderado (observado): %.4f\n", rho_obs))
 cat(sprintf("IC 95%% unilateral inferior (bootstrap): [%.4f, 1]\n", ci95_lower_boot))
@@ -2959,13 +2956,13 @@ cat(sprintf("p-valor analítico (cola derecha): %.5f\n", p_norm_right))
 # 3. Interpretación y comunicación de los resultados
 
 ```{r}
-install.packages("stringr")
-install.packages("scales")
+#install.packages("stringr")
+#install.packages("scales")
 
-library(stringr)
-library(scales)
+#library(stringr)
+#library(scales)
 
-#Mapa de calor ponderado 
+# Mapa de calor ponderado 
 df_heat <- cartagena %>%
   filter(is.finite(vulnerability_score), is.finite(servicios), is.finite(f_exp_hog), f_exp_hog > 0) %>%
   count(vulnerability_score, servicios, wt = f_exp_hog, name = "wt_n") %>%
@@ -3001,7 +2998,7 @@ ggsave(
 ```
 
 ```{r}
-#Tendencia Monotónica
+# Tendencia Monotónica
 df_profile <- cartagena %>%
   filter(is.finite(vulnerability_score), is.finite(servicios), is.finite(f_exp_hog), f_exp_hog > 0) %>%
   group_by(vulnerability_score) %>%
@@ -3038,7 +3035,7 @@ ggsave(
 ```
 
 ```{r}
-#Distribucion de la correlación y el intervalo de confianza 
+# Distribucion de la correlación y el intervalo de confianza 
 boots <- boot_res$boots
 ci_lo <- as.numeric(quantile(boots, 0.025, na.rm = TRUE))
 ci_hi <- as.numeric(quantile(boots, 0.975, na.rm = TRUE))
